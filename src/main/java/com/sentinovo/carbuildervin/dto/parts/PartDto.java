@@ -23,14 +23,14 @@ public class PartDto {
     @Schema(description = "Vehicle upgrade ID", example = "f2d9b6c3-8713-4fca-b33e-9c38e8d897aa")
     private UUID vehicleUpgradeId;
 
-    @Schema(description = "Part category ID", example = "1")
-    private Integer categoryId;
+    @Schema(description = "Part category code", example = "SUSPENSION")
+    private String categoryCode;
 
     @Schema(description = "Part category name", example = "Suspension")
     private String categoryName;
 
-    @Schema(description = "Part tier ID", example = "2")
-    private Integer tierId;
+    @Schema(description = "Part tier code", example = "OEM")
+    private String tierCode;
 
     @Schema(description = "Part tier name", example = "Premium")
     private String tierName;
@@ -48,7 +48,16 @@ public class PartDto {
     private String partNumber;
 
     @Schema(description = "Product link URL", example = "https://example.com/product")
-    private String link;
+    private String productUrl;
+    
+    @Schema(description = "Whether this part is required", example = "true")
+    private Boolean isRequired;
+    
+    @Schema(description = "Target purchase date", example = "2024-06-01")
+    private java.time.LocalDate targetPurchaseDate;
+    
+    @Schema(description = "Sort order for display", example = "1")
+    private Integer sortOrder;
 
     @Schema(description = "Priority value for sorting", example = "100")
     private Integer priorityValue;

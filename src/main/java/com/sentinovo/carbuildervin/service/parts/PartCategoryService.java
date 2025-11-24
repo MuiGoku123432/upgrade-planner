@@ -1,9 +1,11 @@
-package com.sentinovo.carbuildervin.services.parts;
+package com.sentinovo.carbuildervin.service.parts;
 
+import com.sentinovo.carbuildervin.dto.parts.lookup.*;
 import com.sentinovo.carbuildervin.entities.parts.PartCategory;
 import com.sentinovo.carbuildervin.exception.DuplicateResourceException;
 import com.sentinovo.carbuildervin.exception.InvalidStateException;
 import com.sentinovo.carbuildervin.exception.ResourceNotFoundException;
+import com.sentinovo.carbuildervin.mapper.parts.PartCategoryMapper;
 import com.sentinovo.carbuildervin.repository.parts.PartCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class PartCategoryService {
 
     private final PartCategoryRepository partCategoryRepository;
+    private final PartCategoryMapper partCategoryMapper;
 
     @Transactional(readOnly = true)
     public PartCategory findByCode(String code) {
@@ -60,6 +63,32 @@ public class PartCategoryService {
         return countPartsInCategory(categoryCode) + countSubPartsInCategory(categoryCode);
     }
 
+    // ===== DTO-Based Methods =====
+
+    @Transactional(readOnly = true)
+    public PartCategoryDto getPartCategoryByCode(String code) {
+        PartCategory category = findByCode(code);
+        return partCategoryMapper.toDto(category);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PartCategoryDto> getPartCategoryByCodeOptional(String code) {
+        return findByCodeOptional(code)
+                .map(partCategoryMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartCategoryDto> getAllPartCategories() {
+        List<PartCategory> categories = findAllCategories();
+        return partCategoryMapper.toDtoList(categories);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartCategoryDto> searchPartCategories(String searchTerm) {
+        List<PartCategory> categories = searchCategories(searchTerm);
+        return partCategoryMapper.toDtoList(categories);
+    }
+
     public PartCategory createCategory(String code, String label, String description, Integer sortOrder) {
         log.info("Creating new part category with code: {}", code);
         
@@ -82,6 +111,26 @@ public class PartCategoryService {
         return savedCategory;
     }
 
+    public PartCategoryDto createPartCategory(PartCategoryCreateDto createDto) {
+        log.info("Creating new part category with code: {}", createDto.getCode());
+        
+        validateCategoryCreation(createDto.getCode());
+        
+        Integer sortOrder = createDto.getSortOrder();
+        if (sortOrder == null) {
+            Integer maxSortOrder = partCategoryRepository.findMaxSortOrder();
+            sortOrder = (maxSortOrder != null) ? maxSortOrder + 1 : 1;
+        }
+        
+        PartCategory category = partCategoryMapper.toEntity(createDto);
+        category.setCode(createDto.getCode().toUpperCase());
+        category.setSortOrder(sortOrder);
+        
+        PartCategory savedCategory = partCategoryRepository.save(category);
+        log.info("Successfully created part category with code: {}", savedCategory.getCode());
+        return partCategoryMapper.toDto(savedCategory);
+    }
+
     public PartCategory updateCategory(String code, String label, String description, Integer sortOrder) {
         log.info("Updating part category with code: {}", code);
         
@@ -94,6 +143,17 @@ public class PartCategoryService {
         PartCategory savedCategory = partCategoryRepository.save(category);
         log.info("Successfully updated part category with code: {}", savedCategory.getCode());
         return savedCategory;
+    }
+
+    public PartCategoryDto updatePartCategory(String code, PartCategoryUpdateDto updateDto) {
+        log.info("Updating part category with code: {}", code);
+        
+        PartCategory category = findByCode(code);
+        partCategoryMapper.updateEntity(category, updateDto);
+        
+        PartCategory savedCategory = partCategoryRepository.save(category);
+        log.info("Successfully updated part category with code: {}", savedCategory.getCode());
+        return partCategoryMapper.toDto(savedCategory);
     }
 
     public PartCategory updateCategorySortOrder(String code, Integer sortOrder) {

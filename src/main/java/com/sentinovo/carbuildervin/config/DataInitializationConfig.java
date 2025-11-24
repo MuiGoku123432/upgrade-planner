@@ -1,9 +1,9 @@
 package com.sentinovo.carbuildervin.config;
 
-import com.sentinovo.carbuildervin.services.parts.PartCategoryService;
-import com.sentinovo.carbuildervin.services.parts.PartTierService;
-import com.sentinovo.carbuildervin.services.user.RoleService;
-import com.sentinovo.carbuildervin.services.vehicle.UpgradeCategoryService;
+import com.sentinovo.carbuildervin.service.parts.PartCategoryService;
+import com.sentinovo.carbuildervin.service.parts.PartTierService;
+import com.sentinovo.carbuildervin.service.user.RoleService;
+import com.sentinovo.carbuildervin.service.vehicle.UpgradeCategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

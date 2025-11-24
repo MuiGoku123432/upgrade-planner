@@ -1,4 +1,4 @@
-package com.sentinovo.carbuildervin.services.external;
+package com.sentinovo.carbuildervin.service.external;
 
 import com.sentinovo.carbuildervin.exception.ExternalServiceException;
 import com.sentinovo.carbuildervin.exception.ValidationException;

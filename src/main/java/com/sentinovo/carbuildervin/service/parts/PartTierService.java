@@ -1,9 +1,11 @@
-package com.sentinovo.carbuildervin.services.parts;
+package com.sentinovo.carbuildervin.service.parts;
 
+import com.sentinovo.carbuildervin.dto.parts.lookup.*;
 import com.sentinovo.carbuildervin.entities.parts.PartTier;
 import com.sentinovo.carbuildervin.exception.DuplicateResourceException;
 import com.sentinovo.carbuildervin.exception.InvalidStateException;
 import com.sentinovo.carbuildervin.exception.ResourceNotFoundException;
+import com.sentinovo.carbuildervin.mapper.parts.PartTierMapper;
 import com.sentinovo.carbuildervin.repository.parts.PartTierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class PartTierService {
 
     private final PartTierRepository partTierRepository;
+    private final PartTierMapper partTierMapper;
 
     @Transactional(readOnly = true)
     public PartTier findByCode(String code) {
@@ -80,6 +83,56 @@ public class PartTierService {
         return countPartsInTier(tierCode) + countSubPartsInTier(tierCode);
     }
 
+    // ===== DTO-Based Methods =====
+
+    @Transactional(readOnly = true)
+    public PartTierDto getPartTierByCode(String code) {
+        PartTier tier = findByCode(code);
+        return partTierMapper.toDto(tier);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PartTierDto> getPartTierByCodeOptional(String code) {
+        return findByCodeOptional(code)
+                .map(partTierMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartTierDto> getAllPartTiers() {
+        List<PartTier> tiers = findAllTiers();
+        return partTierMapper.toDtoList(tiers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartTierDto> getPartTiersByRank(Integer rank) {
+        List<PartTier> tiers = findTiersByRank(rank);
+        return partTierMapper.toDtoList(tiers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartTierDto> getPartTiersAboveRank(Integer minRank) {
+        List<PartTier> tiers = findTiersAboveRank(minRank);
+        return partTierMapper.toDtoList(tiers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartTierDto> getPartTiersBelowRank(Integer maxRank) {
+        List<PartTier> tiers = findTiersBelowRank(maxRank);
+        return partTierMapper.toDtoList(tiers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartTierDto> getPartTiersInRankRange(Integer minRank, Integer maxRank) {
+        List<PartTier> tiers = findTiersInRankRange(minRank, maxRank);
+        return partTierMapper.toDtoList(tiers);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartTierDto> searchPartTiers(String searchTerm) {
+        List<PartTier> tiers = searchTiers(searchTerm);
+        return partTierMapper.toDtoList(tiers);
+    }
+
     public PartTier createTier(String code, String label, Integer rank, String description) {
         log.info("Creating new part tier with code: {} and rank: {}", code, rank);
         
@@ -95,6 +148,35 @@ public class PartTierService {
         PartTier savedTier = partTierRepository.save(tier);
         log.info("Successfully created part tier with code: {}", savedTier.getCode());
         return savedTier;
+    }
+
+    public PartTierDto createPartTier(PartTierCreateDto createDto) {
+        log.info("Creating new part tier with code: {} and rank: {}", createDto.getCode(), createDto.getRank());
+        
+        validateTierCreation(createDto.getCode(), createDto.getRank());
+        
+        PartTier tier = partTierMapper.toEntity(createDto);
+        tier.setCode(createDto.getCode().toUpperCase());
+        
+        PartTier savedTier = partTierRepository.save(tier);
+        log.info("Successfully created part tier with code: {}", savedTier.getCode());
+        return partTierMapper.toDto(savedTier);
+    }
+
+    public PartTierDto updatePartTier(String code, PartTierUpdateDto updateDto) {
+        log.info("Updating part tier with code: {}", code);
+        
+        PartTier tier = findByCode(code);
+        
+        if (updateDto.getRank() != null && !updateDto.getRank().equals(tier.getRank())) {
+            validateRankUniquenessForUpdate(updateDto.getRank(), code);
+        }
+        
+        partTierMapper.updateEntity(tier, updateDto);
+        PartTier savedTier = partTierRepository.save(tier);
+        
+        log.info("Successfully updated part tier with code: {}", savedTier.getCode());
+        return partTierMapper.toDto(savedTier);
     }
 
     public PartTier updateTier(String code, String label, Integer rank, String description) {

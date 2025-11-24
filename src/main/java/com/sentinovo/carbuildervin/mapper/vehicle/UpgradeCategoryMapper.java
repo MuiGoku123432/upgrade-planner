@@ -13,15 +13,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface UpgradeCategoryMapper {
 
-    @Mapping(target = "priorityValue", source = "sortOrder")
-    @Mapping(target = "createdAt", ignore = true) // UpgradeCategory doesn't extend BaseEntity
-    @Mapping(target = "updatedAt", ignore = true)
     UpgradeCategoryDto toDto(UpgradeCategory entity);
 
     List<UpgradeCategoryDto> toDtoList(List<UpgradeCategory> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "sortOrder", source = "priorityValue")
     @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "vehicleUpgrades", ignore = true)
     UpgradeCategory toEntity(UpgradeCategoryCreateDto createDto);
@@ -29,7 +25,6 @@ public interface UpgradeCategoryMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "key", ignore = true)
-    @Mapping(target = "sortOrder", source = "priorityValue")
     @Mapping(target = "vehicleUpgrades", ignore = true)
     void updateEntity(@MappingTarget UpgradeCategory entity, UpgradeCategoryUpdateDto updateDto);
 

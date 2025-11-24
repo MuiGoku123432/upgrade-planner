@@ -22,29 +22,24 @@ public interface VehicleUpgradeMapper {
 
     List<VehicleUpgradeDto> toDtoList(List<VehicleUpgrade> entities);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "upgradeCategory", ignore = true)
     @Mapping(target = "parts", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     VehicleUpgrade toEntity(VehicleUpgradeCreateDto createDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "upgradeCategory", ignore = true)
+    @Mapping(target = "slug", ignore = true)
     @Mapping(target = "parts", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(@MappingTarget VehicleUpgrade entity, VehicleUpgradeUpdateDto updateDto);
 
-    @Mapping(target = "vehicleId", source = "entity.vehicle.id")
-    @Mapping(target = "categoryName", source = "entity.upgradeCategory.name")
-    @Mapping(target = "partCount", source = "partCount")
-    @Mapping(target = "estimatedCost", source = "estimatedCost")
+    @Mapping(target = "vehicleId", source = "vehicle.id")
+    @Mapping(target = "categoryName", source = "upgradeCategory.name")
+    @Mapping(target = "partCount", expression = "java(0L)")
+    @Mapping(target = "estimatedCost", expression = "java(java.math.BigDecimal.ZERO)")
     @Mapping(target = "currencyCode", constant = "USD")
-    VehicleUpgradeSummaryDto toSummaryDto(VehicleUpgrade entity, Long partCount, BigDecimal estimatedCost);
+    VehicleUpgradeSummaryDto toSummaryDto(VehicleUpgrade entity);
 
     default PageResponseDto<VehicleUpgradeDto> toPageDto(Page<VehicleUpgrade> page) {
         List<VehicleUpgradeDto> items = toDtoList(page.getContent());

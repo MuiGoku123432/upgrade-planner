@@ -1,5 +1,7 @@
-package com.sentinovo.carbuildervin.services.parts;
+package com.sentinovo.carbuildervin.service.parts;
 
+import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
+import com.sentinovo.carbuildervin.dto.parts.*;
 import com.sentinovo.carbuildervin.entities.parts.Part;
 import com.sentinovo.carbuildervin.entities.parts.PartCategory;
 import com.sentinovo.carbuildervin.entities.parts.PartTier;
@@ -7,9 +9,10 @@ import com.sentinovo.carbuildervin.entities.vehicle.VehicleUpgrade;
 import com.sentinovo.carbuildervin.exception.ResourceNotFoundException;
 import com.sentinovo.carbuildervin.exception.UnauthorizedException;
 import com.sentinovo.carbuildervin.exception.ValidationException;
+import com.sentinovo.carbuildervin.mapper.parts.PartMapper;
 import com.sentinovo.carbuildervin.repository.parts.PartRepository;
-import com.sentinovo.carbuildervin.services.user.AuthenticationService;
-import com.sentinovo.carbuildervin.services.vehicle.VehicleUpgradeService;
+import com.sentinovo.carbuildervin.service.user.AuthenticationService;
+import com.sentinovo.carbuildervin.service.vehicle.VehicleUpgradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +36,7 @@ public class PartService {
     private final PartCategoryService partCategoryService;
     private final PartTierService partTierService;
     private final AuthenticationService authenticationService;
+    private final PartMapper partMapper;
 
     @Transactional(readOnly = true)
     public Part findById(UUID id) {
@@ -51,6 +55,72 @@ public class PartService {
     public Part findByIdWithSubParts(UUID id) {
         Part part = findByIdAndValidateOwnership(id);
         return partRepository.findByIdWithSubParts(id).orElse(part);
+    }
+
+    // ===== DTO-Based Methods =====
+
+    @Transactional(readOnly = true)
+    public PartDto getPartById(UUID id) {
+        Part part = findByIdAndValidateOwnership(id);
+        return partMapper.toDto(part);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartDto> getPartsByUpgradeId(UUID upgradeId) {
+        List<Part> parts = findByUpgradeId(upgradeId);
+        return partMapper.toDtoList(parts);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<PartDto> getPartsByUpgradeIdPaged(UUID upgradeId, Pageable pageable) {
+        Page<Part> page = findByUpgradeId(upgradeId, pageable);
+        return partMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartSummaryDto> getPartSummariesByUpgradeId(UUID upgradeId) {
+        List<Part> parts = findByUpgradeId(upgradeId);
+        return parts.stream()
+                .map(partMapper::toSummaryDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartDto> getUserParts(UUID userId) {
+        List<Part> parts = findUserParts(userId);
+        return partMapper.toDtoList(parts);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<PartDto> getUserPartsPaged(UUID userId, Pageable pageable) {
+        Page<Part> page = findUserParts(userId, pageable);
+        return partMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartDto> getUserPartsByStatus(UUID userId, String status) {
+        List<Part> parts = findUserPartsByStatus(userId, status);
+        return partMapper.toDtoList(parts);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartDto> getPartsByUpgradeIdAndStatus(UUID upgradeId, String status) {
+        List<Part> parts = findByUpgradeIdAndStatus(upgradeId, status);
+        return partMapper.toDtoList(parts);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<PartDto> getUserPartsWithFilters(UUID userId, String categoryCode, String tierCode,
+                                                           String status, Integer minPriority, Boolean requiredOnly,
+                                                           Pageable pageable) {
+        Page<Part> page = findUserPartsWithFilters(userId, categoryCode, tierCode, status, minPriority, requiredOnly, pageable);
+        return partMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartDto> searchUserPartsByTerm(UUID userId, String searchTerm) {
+        List<Part> parts = searchUserParts(userId, searchTerm);
+        return partMapper.toDtoList(parts);
     }
 
     @Transactional(readOnly = true)
@@ -218,6 +288,31 @@ public class PartService {
         return savedPart;
     }
 
+    public PartDto createPart(UUID upgradeId, PartCreateDto createDto) {
+        log.info("Creating new part for upgrade: {}", upgradeId);
+        
+        VehicleUpgrade upgrade = vehicleUpgradeService.findByIdAndValidateOwnership(upgradeId);
+        
+        Part part = partMapper.toEntity(createDto);
+        part.setVehicleUpgrade(upgrade);
+        
+        // Set category if provided
+        if (createDto.getCategoryCode() != null) {
+            PartCategory category = partCategoryService.findByCode(createDto.getCategoryCode());
+            part.setPartCategory(category);
+        }
+        
+        // Set tier if provided  
+        if (createDto.getTierCode() != null) {
+            PartTier tier = partTierService.findByCode(createDto.getTierCode());
+            part.setPartTier(tier);
+        }
+        
+        Part savedPart = partRepository.save(part);
+        log.info("Successfully created part with id: {} for upgrade: {}", savedPart.getId(), upgradeId);
+        return partMapper.toDto(savedPart);
+    }
+
     public Part updatePart(UUID partId, String name, String brand, String categoryCode, String tierCode,
                           String productUrl, BigDecimal price, String currencyCode, Boolean isRequired,
                           String status, Integer priorityValue, LocalDate targetPurchaseDate, 
@@ -259,6 +354,35 @@ public class PartService {
         return savedPart;
     }
 
+    public PartDto updatePart(UUID partId, PartUpdateDto updateDto) {
+        log.info("Updating part with id: {}", partId);
+        
+        Part part = findByIdAndValidateOwnership(partId);
+        
+        // Handle category update
+        if (updateDto.getCategoryCode() != null) {
+            PartCategory category = partCategoryService.findByCode(updateDto.getCategoryCode());
+            part.setPartCategory(category);
+        }
+        
+        // Handle tier update
+        if (updateDto.getTierCode() != null) {
+            PartTier tier = partTierService.findByCode(updateDto.getTierCode());
+            part.setPartTier(tier);
+        }
+        
+        // Handle status transition validation
+        if (updateDto.getStatus() != null) {
+            validateStatusTransition(part.getStatus(), updateDto.getStatus());
+        }
+        
+        partMapper.updateEntity(part, updateDto);
+        Part savedPart = partRepository.save(part);
+        
+        log.info("Successfully updated part with id: {}", savedPart.getId());
+        return partMapper.toDto(savedPart);
+    }
+
     public Part updatePartStatus(UUID partId, String status) {
         log.info("Updating status for part with id: {} to {}", partId, status);
         
@@ -269,6 +393,18 @@ public class PartService {
         Part savedPart = partRepository.save(part);
         log.info("Successfully updated status for part with id: {}", savedPart.getId());
         return savedPart;
+    }
+
+    public PartDto updatePartStatusDto(UUID partId, String status) {
+        log.info("Updating status for part with id: {} to {}", partId, status);
+        
+        Part part = findByIdAndValidateOwnership(partId);
+        validateStatusTransition(part.getStatus(), status);
+        part.setStatus(status);
+        
+        Part savedPart = partRepository.save(part);
+        log.info("Successfully updated status for part with id: {}", savedPart.getId());
+        return partMapper.toDto(savedPart);
     }
 
     public void deletePart(UUID partId) {

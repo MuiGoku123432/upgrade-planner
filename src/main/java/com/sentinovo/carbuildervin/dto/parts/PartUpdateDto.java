@@ -16,8 +16,11 @@ import java.math.BigDecimal;
 @Schema(description = "Request to update a part")
 public class PartUpdateDto {
 
-    @Schema(description = "Part tier ID", example = "2")
-    private Integer tierId;
+    @Schema(description = "Part category code", example = "SUSPENSION")
+    private String categoryCode;
+
+    @Schema(description = "Part tier code", example = "OEM")
+    private String tierCode;
 
     @Size(max = 200, message = "Part name cannot exceed 200 characters")
     @Schema(description = "Part name", example = "Fox 2.5 Coilover")
@@ -37,7 +40,16 @@ public class PartUpdateDto {
 
     @Size(max = 500, message = "Link cannot exceed 500 characters")
     @Schema(description = "Product link URL", example = "https://example.com/product")
-    private String link;
+    private String productUrl;
+    
+    @Schema(description = "Whether this part is required", example = "true")
+    private Boolean isRequired;
+    
+    @Schema(description = "Target purchase date", example = "2024-06-01")
+    private java.time.LocalDate targetPurchaseDate;
+    
+    @Schema(description = "Sort order for display", example = "1")
+    private Integer sortOrder;
 
     @Min(value = 1, message = "Priority value must be at least 1")
     @Max(value = 1000, message = "Priority value cannot exceed 1000")

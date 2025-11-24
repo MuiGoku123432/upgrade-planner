@@ -1,5 +1,7 @@
-package com.sentinovo.carbuildervin.services.parts;
+package com.sentinovo.carbuildervin.service.parts;
 
+import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
+import com.sentinovo.carbuildervin.dto.parts.*;
 import com.sentinovo.carbuildervin.entities.parts.Part;
 import com.sentinovo.carbuildervin.entities.parts.PartCategory;
 import com.sentinovo.carbuildervin.entities.parts.PartTier;
@@ -7,8 +9,9 @@ import com.sentinovo.carbuildervin.entities.parts.SubPart;
 import com.sentinovo.carbuildervin.exception.ResourceNotFoundException;
 import com.sentinovo.carbuildervin.exception.UnauthorizedException;
 import com.sentinovo.carbuildervin.exception.ValidationException;
+import com.sentinovo.carbuildervin.mapper.parts.SubPartMapper;
 import com.sentinovo.carbuildervin.repository.parts.SubPartRepository;
-import com.sentinovo.carbuildervin.services.user.AuthenticationService;
+import com.sentinovo.carbuildervin.service.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +35,7 @@ public class SubPartService {
     private final PartCategoryService partCategoryService;
     private final PartTierService partTierService;
     private final AuthenticationService authenticationService;
+    private final SubPartMapper subPartMapper;
 
     @Transactional(readOnly = true)
     public SubPart findById(UUID id) {
@@ -184,6 +188,64 @@ public class SubPartService {
                                                        minPriority, requiredOnly, pageable);
     }
 
+    // ===== DTO-Based Methods =====
+
+    @Transactional(readOnly = true)
+    public SubPartDto getSubPartById(UUID id) {
+        SubPart subPart = findByIdAndValidateOwnership(id);
+        return subPartMapper.toDto(subPart);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubPartDto> getSubPartsByParentPartId(UUID partId) {
+        List<SubPart> subParts = findByParentPartId(partId);
+        return subPartMapper.toDtoList(subParts);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<SubPartDto> getSubPartsByParentPartIdPaged(UUID partId, Pageable pageable) {
+        Page<SubPart> page = findByParentPartId(partId, pageable);
+        return subPartMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubPartDto> getUserSubParts(UUID userId) {
+        List<SubPart> subParts = findUserSubParts(userId);
+        return subPartMapper.toDtoList(subParts);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<SubPartDto> getUserSubPartsPaged(UUID userId, Pageable pageable) {
+        Page<SubPart> page = findUserSubParts(userId, pageable);
+        return subPartMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubPartDto> getUserSubPartsByStatus(UUID userId, String status) {
+        List<SubPart> subParts = findUserSubPartsByStatus(userId, status);
+        return subPartMapper.toDtoList(subParts);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubPartDto> getSubPartsByParentPartIdAndStatus(UUID partId, String status) {
+        List<SubPart> subParts = findByParentPartIdAndStatus(partId, status);
+        return subPartMapper.toDtoList(subParts);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<SubPartDto> getUserSubPartsWithFilters(UUID userId, String categoryCode, String tierCode,
+                                                                 String status, Integer minPriority, Boolean requiredOnly,
+                                                                 Pageable pageable) {
+        Page<SubPart> page = findUserSubPartsWithFilters(userId, categoryCode, tierCode, status, minPriority, requiredOnly, pageable);
+        return subPartMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubPartDto> searchUserSubPartsByTerm(UUID userId, String searchTerm) {
+        List<SubPart> subParts = searchUserSubParts(userId, searchTerm);
+        return subPartMapper.toDtoList(subParts);
+    }
+
     public SubPart createSubPart(UUID parentPartId, String name, String brand, String categoryCode, String tierCode,
                                 String productUrl, BigDecimal price, String currencyCode, Boolean isRequired,
                                 String status, Integer priorityValue, LocalDate targetPurchaseDate, 
@@ -222,6 +284,31 @@ public class SubPartService {
         SubPart savedSubPart = subPartRepository.save(subPart);
         log.info("Successfully created sub-part with id: {} for parent part: {}", savedSubPart.getId(), parentPartId);
         return savedSubPart;
+    }
+
+    public SubPartDto createSubPart(UUID parentPartId, SubPartCreateDto createDto) {
+        log.info("Creating new sub-part for parent part: {}", parentPartId);
+        
+        Part parentPart = partService.findByIdAndValidateOwnership(parentPartId);
+        
+        SubPart subPart = subPartMapper.toEntity(createDto);
+        subPart.setParentPart(parentPart);
+        
+        // Set category if provided
+        if (createDto.getCategoryCode() != null) {
+            PartCategory category = partCategoryService.findByCode(createDto.getCategoryCode());
+            subPart.setPartCategory(category);
+        }
+        
+        // Set tier if provided  
+        if (createDto.getTierCode() != null) {
+            PartTier tier = partTierService.findByCode(createDto.getTierCode());
+            subPart.setPartTier(tier);
+        }
+        
+        SubPart savedSubPart = subPartRepository.save(subPart);
+        log.info("Successfully created sub-part with id: {} for parent part: {}", savedSubPart.getId(), parentPartId);
+        return subPartMapper.toDto(savedSubPart);
     }
 
     public SubPart updateSubPart(UUID subPartId, String name, String brand, String categoryCode, String tierCode,
@@ -265,6 +352,35 @@ public class SubPartService {
         return savedSubPart;
     }
 
+    public SubPartDto updateSubPart(UUID subPartId, SubPartUpdateDto updateDto) {
+        log.info("Updating sub-part with id: {}", subPartId);
+        
+        SubPart subPart = findByIdAndValidateOwnership(subPartId);
+        
+        // Handle category update
+        if (updateDto.getCategoryCode() != null) {
+            PartCategory category = partCategoryService.findByCode(updateDto.getCategoryCode());
+            subPart.setPartCategory(category);
+        }
+        
+        // Handle tier update
+        if (updateDto.getTierCode() != null) {
+            PartTier tier = partTierService.findByCode(updateDto.getTierCode());
+            subPart.setPartTier(tier);
+        }
+        
+        // Handle status transition validation
+        if (updateDto.getStatus() != null) {
+            validateStatusTransition(subPart.getStatus(), updateDto.getStatus());
+        }
+        
+        subPartMapper.updateEntity(subPart, updateDto);
+        SubPart savedSubPart = subPartRepository.save(subPart);
+        
+        log.info("Successfully updated sub-part with id: {}", savedSubPart.getId());
+        return subPartMapper.toDto(savedSubPart);
+    }
+
     public SubPart updateSubPartStatus(UUID subPartId, String status) {
         log.info("Updating status for sub-part with id: {} to {}", subPartId, status);
         
@@ -275,6 +391,18 @@ public class SubPartService {
         SubPart savedSubPart = subPartRepository.save(subPart);
         log.info("Successfully updated status for sub-part with id: {}", savedSubPart.getId());
         return savedSubPart;
+    }
+
+    public SubPartDto updateSubPartStatusDto(UUID subPartId, String status) {
+        log.info("Updating status for sub-part with id: {} to {}", subPartId, status);
+        
+        SubPart subPart = findByIdAndValidateOwnership(subPartId);
+        validateStatusTransition(subPart.getStatus(), status);
+        subPart.setStatus(status);
+        
+        SubPart savedSubPart = subPartRepository.save(subPart);
+        log.info("Successfully updated status for sub-part with id: {}", savedSubPart.getId());
+        return subPartMapper.toDto(savedSubPart);
     }
 
     public void deleteSubPart(UUID subPartId) {
