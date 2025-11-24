@@ -271,9 +271,6 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
-    public UserDto updateUserDto(UUID userId, UserUpdateDto updateDto) {
-        return updateUser(userId, updateDto);
-    }
 
     public void deleteUser(UUID userId) {
         log.info("Deleting user with id: {}", userId);
@@ -283,8 +280,4 @@ public class UserService {
         log.info("Successfully deleted user with id: {}", userId);
     }
 
-    public User findByUsernameRequired(String username) {
-        return findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
-    }
 }

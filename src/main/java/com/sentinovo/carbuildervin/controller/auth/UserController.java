@@ -45,9 +45,8 @@ public class UserController extends BaseController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StandardApiResponse<UserDto>> getCurrentUser(Authentication authentication) {
         String username = authentication.getName();
-        log.info("Getting profile for user: {}", username);
-        
         UserDto user = userService.findByUsernameDto(username);
+        log.info("Getting profile for user ID: {}", user.getId());
         
         return success(user);
     }
@@ -70,12 +69,11 @@ public class UserController extends BaseController {
             Authentication authentication) {
         
         String username = authentication.getName();
-        log.info("Updating profile for user: {}", username);
-        
         UserDto currentUser = userService.findByUsernameDto(username);
-        UserDto updatedUser = userService.updateUserDto(currentUser.getId(), updateDto);
+        log.info("Updating profile for user ID: {}", currentUser.getId());
+        UserDto updatedUser = userService.updateUser(currentUser.getId(), updateDto);
         
-        log.info("User profile updated successfully for user: {}", username);
+        log.info("User profile updated successfully for user ID: {}", updatedUser.getId());
         return success(updatedUser, "Profile updated successfully");
     }
 
@@ -89,12 +87,11 @@ public class UserController extends BaseController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteCurrentUser(Authentication authentication) {
         String username = authentication.getName();
-        log.info("Deleting account for user: {}", username);
-        
         UserDto currentUser = userService.findByUsernameDto(username);
+        log.info("Deleting account for user ID: {}", currentUser.getId());
         userService.deleteUser(currentUser.getId());
         
-        log.info("User account deleted successfully for user: {}", username);
+        log.info("User account deleted successfully for user ID: {}", currentUser.getId());
         return noContent();
     }
 
@@ -114,12 +111,11 @@ public class UserController extends BaseController {
             Authentication authentication) {
         
         String username = authentication.getName();
-        log.info("Password change request for user: {}", username);
-        
         UserDto currentUser = userService.findByUsernameDto(username);
+        log.info("Password change request for user ID: {}", currentUser.getId());
         authenticationService.changeUserPassword(currentUser.getId(), request.getCurrentPassword(), request.getNewPassword());
         
-        log.info("Password changed successfully for user: {}", username);
+        log.info("Password changed successfully for user ID: {}", currentUser.getId());
         return success(null, "Password changed successfully");
     }
 

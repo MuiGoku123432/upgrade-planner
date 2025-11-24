@@ -375,12 +375,14 @@ public class VehicleService {
             String username, String vin, String make, String model, 
             Integer year, boolean includeArchived, Pageable pageable) {
         
-        User user = userService.findByUsernameRequired(username);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         return getUserVehiclesPaged(user.getId(), pageable);
     }
 
     public VehicleDto getVehicleByIdAndOwnerUsername(UUID vehicleId, String username) {
-        User user = userService.findByUsernameRequired(username);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         Vehicle vehicle = findById(vehicleId);
         
         if (!vehicle.getOwner().getId().equals(user.getId())) {
@@ -391,7 +393,8 @@ public class VehicleService {
     }
 
     public VehicleDto createVehicleForUsername(VehicleCreateDto createDto, String username) {
-        User user = userService.findByUsernameRequired(username);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         Vehicle vehicle = vehicleMapper.toEntity(createDto);
         vehicle.setOwner(user);
         
@@ -400,7 +403,8 @@ public class VehicleService {
     }
 
     public void verifyOwnership(UUID vehicleId, String username) {
-        User user = userService.findByUsernameRequired(username);
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         Vehicle vehicle = findById(vehicleId);
         
         if (!vehicle.getOwner().getId().equals(user.getId())) {

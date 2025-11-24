@@ -182,6 +182,12 @@ public class VehicleUpgradeService {
     }
 
     @Transactional(readOnly = true)
+    public VehicleUpgradeSummaryDto getVehicleUpgradeSummaryById(UUID upgradeId) {
+        VehicleUpgrade upgrade = findById(upgradeId);
+        return vehicleUpgradeMapper.toSummaryDto(upgrade);
+    }
+
+    @Transactional(readOnly = true)
     public List<VehicleUpgradeDto> getUserVehicleUpgrades(UUID userId) {
         List<VehicleUpgrade> upgrades = findUserUpgrades(userId);
         return vehicleUpgradeMapper.toDtoList(upgrades);

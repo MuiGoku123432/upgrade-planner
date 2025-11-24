@@ -1,6 +1,10 @@
 package com.sentinovo.carbuildervin.dto.parts;
 
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,13 +41,15 @@ public class SubPartUpdateDto {
     @Schema(description = "Part tier code", example = "OEM")
     private String tierCode;
 
-    @Size(max = 500, message = "Link cannot exceed 500 characters")
+    @Size(max = 500, message = "Product URL cannot exceed 500 characters")
     @Schema(description = "Product link URL", example = "https://example.com/subpart")
     private String productUrl;
 
     @Schema(description = "Part status", example = "PLANNED", allowableValues = {"PLANNED", "ORDERED", "SHIPPED", "DELIVERED", "INSTALLED", "CANCELLED"})
     private String status;
 
+    @DecimalMin(value = "0.00", inclusive = true, message = "Price must be non-negative")
+    @Digits(integer = 10, fraction = 2, message = "Price must have at most 10 integer digits and 2 decimal places")
     @Schema(description = "Part price", example = "150.00")
     private java.math.BigDecimal price;
 
@@ -53,6 +59,8 @@ public class SubPartUpdateDto {
     @Schema(description = "Whether this part is required", example = "true")
     private Boolean isRequired;
 
+    @Min(value = 1, message = "Priority value must be at least 1")
+    @Max(value = 1000, message = "Priority value cannot exceed 1000")
     @Schema(description = "Priority value for sorting (1-1000)", example = "100")
     private Integer priorityValue;
 

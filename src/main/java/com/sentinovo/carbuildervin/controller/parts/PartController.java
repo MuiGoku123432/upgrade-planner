@@ -43,7 +43,7 @@ public class PartController extends BaseController {
 
     @Operation(
         summary = "List parts in build", 
-        description = "Get paginated list of parts in a specific build with optional filters"
+        description = "Get paginated list of parts in a specific build"
     )
     @ApiResponse(
         responseCode = "200", 
@@ -64,17 +64,11 @@ public class PartController extends BaseController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StandardApiResponse<PageResponseDto<PartDto>>> getBuildParts(
             @PathVariable UUID buildId,
-            @Parameter(description = "Category code filter") @RequestParam(required = false) String categoryCode,
-            @Parameter(description = "Tier code filter") @RequestParam(required = false) String tierCode,
-            @Parameter(description = "Status filter") @RequestParam(required = false) String status,
-            @Parameter(description = "Minimum priority filter") @RequestParam(required = false) Integer minPriority,
-            @Parameter(description = "Maximum priority filter") @RequestParam(required = false) Integer maxPriority,
-            @Parameter(description = "Required parts only") @RequestParam(required = false) Boolean required,
             @Parameter(description = "Pagination parameters") Pageable pageable,
             Authentication authentication) {
         
         String username = authentication.getName();
-        log.info("Getting parts for build {} for user: {} with filters", buildId, username);
+        log.info("Getting parts for build {} for user: {}", buildId, username);
         
         VehicleUpgradeDto build = vehicleUpgradeService.getVehicleUpgradeById(buildId);
         vehicleService.verifyOwnership(build.getVehicleId(), username);
@@ -217,7 +211,7 @@ public class PartController extends BaseController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StandardApiResponse<PartDto>> updatePartStatus(
             @PathVariable UUID partId,
-            @RequestBody StatusUpdateRequest request,
+            @Valid @RequestBody StatusUpdateRequest request,
             Authentication authentication) {
         
         String username = authentication.getName();
@@ -269,7 +263,13 @@ public class PartController extends BaseController {
 
     @Schema(description = "Status update request")
     public static class StatusUpdateRequest {
-        @Schema(description = "New status", example = "ORDERED")
+        @jakarta.validation.constraints.NotNull(message = "Status cannot be null")
+        @jakarta.validation.constraints.NotBlank(message = "Status cannot be blank")
+        @jakarta.validation.constraints.Pattern(
+            regexp = "^(PLANNED|ORDERED|SHIPPED|DELIVERED|INSTALLED|CANCELLED)$", 
+            message = "Status must be one of: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED"
+        )
+        @Schema(description = "New status", example = "ORDERED", allowableValues = {"PLANNED", "ORDERED", "SHIPPED", "DELIVERED", "INSTALLED", "CANCELLED"})
         private String status;
 
         public String getStatus() {

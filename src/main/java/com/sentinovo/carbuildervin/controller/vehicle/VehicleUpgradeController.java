@@ -251,9 +251,7 @@ public class VehicleUpgradeController extends BaseController {
         VehicleUpgradeDto currentBuild = vehicleUpgradeService.getVehicleUpgradeById(buildId);
         vehicleService.verifyOwnership(currentBuild.getVehicleId(), username);
         
-        List<VehicleUpgradeSummaryDto> summaries = vehicleUpgradeService.getVehicleUpgradeSummariesByVehicleId(currentBuild.getVehicleId());
-        VehicleUpgradeSummaryDto summary = summaries.stream().filter(s -> s.getId().equals(buildId)).findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("VehicleUpgrade", buildId));
+        VehicleUpgradeSummaryDto summary = vehicleUpgradeService.getVehicleUpgradeSummaryById(buildId);
         
         return success(summary);
     }

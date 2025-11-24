@@ -215,7 +215,7 @@ public class SubPartController extends BaseController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StandardApiResponse<SubPartDto>> updateSubPartStatus(
             @PathVariable UUID subPartId,
-            @RequestBody StatusUpdateRequest request,
+            @Valid @RequestBody StatusUpdateRequest request,
             Authentication authentication) {
         
         String username = authentication.getName();
@@ -269,7 +269,13 @@ public class SubPartController extends BaseController {
 
     @Schema(description = "Status update request")
     public static class StatusUpdateRequest {
-        @Schema(description = "New status", example = "ORDERED")
+        @jakarta.validation.constraints.NotNull(message = "Status cannot be null")
+        @jakarta.validation.constraints.NotBlank(message = "Status cannot be blank")
+        @jakarta.validation.constraints.Pattern(
+            regexp = "^(PLANNED|ORDERED|SHIPPED|DELIVERED|INSTALLED|CANCELLED)$", 
+            message = "Status must be one of: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED"
+        )
+        @Schema(description = "New status", example = "ORDERED", allowableValues = {"PLANNED", "ORDERED", "SHIPPED", "DELIVERED", "INSTALLED", "CANCELLED"})
         private String status;
 
         public String getStatus() {

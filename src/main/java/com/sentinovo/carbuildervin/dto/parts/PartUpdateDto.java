@@ -38,7 +38,7 @@ public class PartUpdateDto {
     @Schema(description = "Part number", example = "FOX-25-CO-001")
     private String partNumber;
 
-    @Size(max = 500, message = "Link cannot exceed 500 characters")
+    @Size(max = 500, message = "Product URL cannot exceed 500 characters")
     @Schema(description = "Product link URL", example = "https://example.com/product")
     private String productUrl;
     
