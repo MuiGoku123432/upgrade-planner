@@ -45,6 +45,10 @@ public class SubPartUpdateDto {
     @Schema(description = "Product link URL", example = "https://example.com/subpart")
     private String productUrl;
 
+    @jakarta.validation.constraints.Pattern(
+        regexp = "^(PLANNED|ORDERED|SHIPPED|DELIVERED|INSTALLED|CANCELLED)$", 
+        message = "Status must be one of: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED"
+    )
     @Schema(description = "Part status", example = "PLANNED", allowableValues = {"PLANNED", "ORDERED", "SHIPPED", "DELIVERED", "INSTALLED", "CANCELLED"})
     private String status;
 

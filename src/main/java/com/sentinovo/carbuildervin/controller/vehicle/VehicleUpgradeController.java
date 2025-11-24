@@ -268,13 +268,11 @@ public class VehicleUpgradeController extends BaseController {
     @GetMapping("/builds")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StandardApiResponse<PageResponseDto<VehicleUpgradeDto>>> getAllBuilds(
-            @Parameter(description = "Status filter") @RequestParam(required = false) String status,
-            @Parameter(description = "Category ID filter") @RequestParam(required = false) Integer categoryId,
             @Parameter(description = "Pagination parameters") Pageable pageable,
             Authentication authentication) {
         
         String username = authentication.getName();
-        log.info("Getting all builds for user: {} with filters - status: {}, categoryId: {}", username, status, categoryId);
+        log.info("Getting all builds for user: {}", username);
         
         UserDto user = userService.findByUsernameDto(username);
         PageResponseDto<VehicleUpgradeDto> builds = vehicleUpgradeService.getUserVehicleUpgradesPaged(user.getId(), pageable);
