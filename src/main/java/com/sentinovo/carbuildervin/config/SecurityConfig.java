@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/pico-main/**").permitAll()
+                .requestMatchers("/", "/demo", "/dashboard").permitAll()
                 .anyRequest().authenticated()
             )
             .csrf(csrf -> csrf.disable())
