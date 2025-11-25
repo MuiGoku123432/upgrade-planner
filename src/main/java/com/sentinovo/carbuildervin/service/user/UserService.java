@@ -1,4 +1,4 @@
-package com.sentinovo.carbuildervin.services.user;
+package com.sentinovo.carbuildervin.service.user;
 
 import com.sentinovo.carbuildervin.dto.auth.*;
 import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -265,4 +264,20 @@ public class UserService {
             throw new DuplicateResourceException("User", "email", email);
         }
     }
+
+    public UserDto findByUsernameDto(String username) {
+        User user = findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        return userMapper.toDto(user);
+    }
+
+
+    public void deleteUser(UUID userId) {
+        log.info("Deleting user with id: {}", userId);
+        User user = findById(userId);
+        user.setIsActive(false);
+        userRepository.save(user);
+        log.info("Successfully deleted user with id: {}", userId);
+    }
+
 }

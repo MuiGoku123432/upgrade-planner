@@ -1,4 +1,4 @@
-package com.sentinovo.carbuildervin.services.user;
+package com.sentinovo.carbuildervin.service.user;
 
 import com.sentinovo.carbuildervin.dto.auth.*;
 import com.sentinovo.carbuildervin.entities.user.Role;
@@ -202,5 +202,17 @@ public class AuthenticationService {
         if (!userService.isEmailAvailable(email)) {
             throw new ValidationException("email", "Email is already registered");
         }
+    }
+
+    public void logout() {
+        log.info("User logout");
+    }
+
+    public AuthenticationResponseDto refreshToken(String token) {
+        log.info("Token refresh request");
+        return AuthenticationResponseDto.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .build();
     }
 }

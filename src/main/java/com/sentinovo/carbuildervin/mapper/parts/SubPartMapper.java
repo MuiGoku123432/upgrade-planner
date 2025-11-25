@@ -13,32 +13,28 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SubPartMapper {
 
-    @Mapping(target = "parentPartId", source = "parentPart.id")
-    @Mapping(target = "categoryId", source = "partCategory.code") // PartCategory uses code as primary key
-    @Mapping(target = "categoryName", source = "partCategory.label") // Entity uses 'label' not 'name'
-    @Mapping(target = "tierId", source = "partTier.code") // PartTier uses code as primary key
-    @Mapping(target = "tierName", source = "partTier.label") // Entity uses 'label' not 'name'
-    @Mapping(target = "link", source = "productUrl") // Entity uses 'productUrl' not 'link'
+    @Mapping(target = "partId", source = "parentPart.id")
+    @Mapping(target = "categoryCode", source = "partCategory.code")
+    @Mapping(target = "categoryName", source = "partCategory.label")
+    @Mapping(target = "tierCode", source = "partTier.code")
+    @Mapping(target = "tierName", source = "partTier.label")
+    @Mapping(target = "productUrl", source = "productUrl")
     SubPartDto toDto(SubPart entity);
 
     List<SubPartDto> toDtoList(List<SubPart> entities);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "parentPart", ignore = true)
     @Mapping(target = "partCategory", ignore = true)
     @Mapping(target = "partTier", ignore = true)
-    @Mapping(target = "productUrl", source = "link") // Entity uses 'productUrl' not 'link'
-    @Mapping(target = "quantity", defaultValue = "1")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "productUrl", source = "productUrl")
     SubPart toEntity(SubPartCreateDto createDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "parentPart", ignore = true)
     @Mapping(target = "partCategory", ignore = true)
     @Mapping(target = "partTier", ignore = true)
-    @Mapping(target = "productUrl", source = "link") // Entity uses 'productUrl' not 'link'
+    @Mapping(target = "productUrl", source = "productUrl")
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(@MappingTarget SubPart entity, SubPartUpdateDto updateDto);

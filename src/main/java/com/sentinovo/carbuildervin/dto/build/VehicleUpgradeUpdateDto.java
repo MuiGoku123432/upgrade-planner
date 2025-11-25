@@ -18,6 +18,9 @@ import java.time.LocalDate;
 @Schema(description = "Request to update vehicle build")
 public class VehicleUpgradeUpdateDto {
 
+    @Schema(description = "Category ID", example = "1")
+    private Integer categoryId;
+
     @Size(max = 200, message = "Name cannot exceed 200 characters")
     @Schema(description = "Build name", example = "Overland Build v2")
     private String name;

@@ -18,21 +18,15 @@ public interface VehicleMapper {
 
     List<VehicleDto> toDtoList(List<Vehicle> entities);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "isArchived", constant = "false")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "upgrades", ignore = true)
+    @Mapping(target = "vehicleUpgrades", ignore = true)
     Vehicle toEntity(VehicleCreateDto createDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "isArchived", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "upgrades", ignore = true)
+    @Mapping(target = "vehicleUpgrades", ignore = true)
     void updateEntity(@MappingTarget Vehicle entity, VehicleUpdateDto updateDto);
 
     default PageResponseDto<VehicleDto> toPageDto(Page<Vehicle> page) {

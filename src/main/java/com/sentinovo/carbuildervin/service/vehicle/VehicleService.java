@@ -1,4 +1,4 @@
-package com.sentinovo.carbuildervin.services.vehicle;
+package com.sentinovo.carbuildervin.service.vehicle;
 
 import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
 import com.sentinovo.carbuildervin.dto.vehicle.*;
@@ -10,9 +10,9 @@ import com.sentinovo.carbuildervin.exception.UnauthorizedException;
 import com.sentinovo.carbuildervin.exception.ValidationException;
 import com.sentinovo.carbuildervin.mapper.vehicle.VehicleMapper;
 import com.sentinovo.carbuildervin.repository.vehicle.VehicleRepository;
-import com.sentinovo.carbuildervin.services.user.AuthenticationService;
+import com.sentinovo.carbuildervin.service.user.AuthenticationService;
+import com.sentinovo.carbuildervin.service.user.UserService;
 import com.sentinovo.carbuildervin.validation.ValidationUtils;
-import com.sentinovo.carbuildervin.validation.VinValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +33,7 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final AuthenticationService authenticationService;
+    private final UserService userService;
     private final VehicleMapper vehicleMapper;
 
     @Transactional(readOnly = true)
@@ -368,5 +369,53 @@ public class VehicleService {
         if (vin != null && vehicleRepository.existsByVinAndIdNotAndNotDeleted(vin, vehicleId)) {
             throw new DuplicateResourceException("Vehicle", "VIN", vin);
         }
+    }
+
+    public PageResponseDto<VehicleDto> getVehiclesByOwnerUsername(
+            String username, String vin, String make, String model, 
+            Integer year, boolean includeArchived, Pageable pageable) {
+        
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        return getUserVehiclesPaged(user.getId(), pageable);
+    }
+
+    public VehicleDto getVehicleByIdAndOwnerUsername(UUID vehicleId, String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        Vehicle vehicle = findById(vehicleId);
+        
+        if (!vehicle.getOwner().getId().equals(user.getId())) {
+            throw new ValidationException("Access denied");
+        }
+        
+        return vehicleMapper.toDto(vehicle);
+    }
+
+    public VehicleDto createVehicleForUsername(VehicleCreateDto createDto, String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        Vehicle vehicle = vehicleMapper.toEntity(createDto);
+        vehicle.setOwner(user);
+        
+        Vehicle saved = vehicleRepository.save(vehicle);
+        return vehicleMapper.toDto(saved);
+    }
+
+    public void verifyOwnership(UUID vehicleId, String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        Vehicle vehicle = findById(vehicleId);
+        
+        if (!vehicle.getOwner().getId().equals(user.getId())) {
+            throw new ValidationException("Access denied - not owner");
+        }
+    }
+
+    public VehicleDto setVehicleArchiveStatus(UUID vehicleId, boolean archived) {
+        Vehicle vehicle = findById(vehicleId);
+        vehicle.setIsArchived(archived);
+        Vehicle saved = vehicleRepository.save(vehicle);
+        return vehicleMapper.toDto(saved);
     }
 }

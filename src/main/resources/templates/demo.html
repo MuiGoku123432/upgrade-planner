@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base}">
+
+<head layout:fragment="head">
+    <style>
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, 
+                rgba(0, 191, 255, 0.05), 
+                rgba(0, 212, 255, 0.02)
+            );
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .metric-card {
+            background: var(--card-background-color);
+            border: 1px solid var(--card-border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                var(--jarvis-glow-color), 
+                var(--jarvis-accent-color)
+            );
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--jarvis-glow-color);
+            text-shadow: 0 0 10px currentColor;
+            margin: 0;
+        }
+        
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--muted-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0.5rem 0 0 0;
+        }
+        
+        .vehicle-preview {
+            background: var(--card-background-color);
+            border: 1px solid var(--card-border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .vehicle-preview:hover {
+            border-color: var(--jarvis-glow-color);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.1);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--muted-border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--jarvis-glow-color), var(--jarvis-accent-color));
+            transition: width 0.3s ease;
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-on-scroll.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<div layout:fragment="content">
+    <!-- Hero Section -->
+    <section class="hero-section animate-on-scroll">
+        <h1 class="glow">Jarvis System Interface</h1>
+        <p style="font-size: 1.2rem; color: var(--muted-color); max-width: 600px; margin: 1rem auto;">
+            Advanced vehicle build planning and parts management system with AI-powered insights and real-time monitoring.
+        </p>
+        <div style="margin-top: 2rem;">
+            <button class="primary" 
+                    hx-get="/api/v1/vehicles" 
+                    hx-target="#vehicle-data" 
+                    hx-swap="innerHTML"
+                    hx-indicator=".loading-vehicles">
+                Access Vehicle Database
+            </button>
+            <button class="secondary" style="margin-left: 1rem;" onclick="window.CarBuilderVIN.showNotification('System diagnostics initiated', 'info')">
+                Run Diagnostics
+            </button>
+        </div>
+        <div class="loading-vehicles htmx-indicator" style="margin-top: 1rem;">
+            <small style="color: var(--jarvis-glow-color);">Accessing vehicle database...</small>
+        </div>
+    </section>
+
+    <!-- System Metrics -->
+    <section class="animate-on-scroll">
+        <h2>System Status</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" data-metric="vehicles">12</div>
+                <div class="metric-label">Active Vehicles</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" data-metric="builds">27</div>
+                <div class="metric-label">Build Projects</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" data-metric="cpu">78</div>
+                <div class="metric-label">CPU Usage %</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" data-metric="memory">45</div>
+                <div class="metric-label">Memory Usage %</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- System Modules -->
+    <section class="animate-on-scroll">
+        <h2>System Modules</h2>
+        <div class="module-grid">
+            <article class="module-card">
+                <header class="module-header">Vehicle Registry</header>
+                <div class="module-content">
+                    <p>Comprehensive vehicle database with VIN decoding and specification management.</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 85%;"></div>
+                    </div>
+                    <small style="color: var(--muted-color);">System Health: 85%</small>
+                </div>
+                <footer class="module-footer">
+                    <button class="primary" 
+                            hx-get="/demo/vehicle-data" 
+                            hx-target="#vehicle-module-content"
+                            hx-swap="innerHTML">
+                        Access Module
+                    </button>
+                </footer>
+            </article>
+
+            <article class="module-card">
+                <header class="module-header">Build Planner</header>
+                <div class="module-content">
+                    <p>Advanced build planning with cost estimation and parts optimization algorithms.</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 92%;"></div>
+                    </div>
+                    <small style="color: var(--muted-color);">System Health: 92%</small>
+                </div>
+                <footer class="module-footer">
+                    <button class="secondary" 
+                            hx-get="/demo/build-data" 
+                            hx-target="#build-module-content"
+                            hx-swap="innerHTML">
+                        Run Diagnostics
+                    </button>
+                </footer>
+            </article>
+
+            <article class="module-card">
+                <header class="module-header">Parts Catalog</header>
+                <div class="module-content">
+                    <p>Intelligent parts management with real-time pricing and availability tracking.</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 78%;"></div>
+                    </div>
+                    <small style="color: var(--muted-color);">System Health: 78%</small>
+                </div>
+                <footer class="module-footer">
+                    <button class="contrast" 
+                            hx-get="/demo/parts-data" 
+                            hx-target="#parts-module-content"
+                            hx-swap="innerHTML">
+                        Analyze Inventory
+                    </button>
+                </footer>
+            </article>
+        </div>
+    </section>
+
+    <!-- Dynamic Content Areas -->
+    <section class="animate-on-scroll">
+        <h3>Live System Data</h3>
+        
+        <div id="vehicle-data" class="jarvis-card" style="margin: 1rem 0; min-height: 100px; display: flex; align-items: center; justify-content: center; color: var(--muted-color);">
+            Click "Access Vehicle Database" to load vehicle data...
+        </div>
+        
+        <div class="grid">
+            <div>
+                <h4>Module Data</h4>
+                <div id="vehicle-module-content" class="jarvis-card" style="min-height: 80px; display: flex; align-items: center; justify-content: center; color: var(--muted-color);">
+                    Vehicle Registry data will appear here...
+                </div>
+                <div id="build-module-content" class="jarvis-card" style="min-height: 80px; margin-top: 1rem; display: flex; align-items: center; justify-content: center; color: var(--muted-color);">
+                    Build Planner data will appear here...
+                </div>
+                <div id="parts-module-content" class="jarvis-card" style="min-height: 80px; margin-top: 1rem; display: flex; align-items: center; justify-content: center; color: var(--muted-color);">
+                    Parts Catalog data will appear here...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Data Input -->
+    <section class="animate-on-scroll">
+        <h3>System Interface</h3>
+        <form class="jarvis-form">
+            <div class="grid">
+                <div>
+                    <label for="operator">Operator Name</label>
+                    <input type="text" 
+                           id="operator" 
+                           name="operator" 
+                           th:value="${operatorName ?: 'T. Stark'}"
+                           placeholder="e.g., T. Stark">
+                </div>
+                <div>
+                    <label for="protocol">Security Protocol</label>
+                    <select id="protocol" name="protocol">
+                        <option value="standard">Standard Access</option>
+                        <option value="elevated">Elevated Access</option>
+                        <option value="admin">Administrative Access</option>
+                    </select>
+                </div>
+            </div>
+
+            <label for="query">System Query</label>
+            <input type="search" 
+                   id="query" 
+                   name="query" 
+                   placeholder="Search vehicles, parts, or builds..."
+                   hx-get="/demo/search"
+                   hx-target="#search-results-demo"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-indicator=".search-loading-demo">
+
+            <label>
+                <input type="checkbox" id="engage-protocol" name="engage-protocol" checked>
+                Engage Advanced Protocols
+            </label>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" 
+                        class="secondary"
+                        onclick="document.querySelector('#query').value = 'Tesla Model S'; document.querySelector('#query').dispatchEvent(new Event('keyup'));">
+                    Quick Search: Tesla
+                </button>
+                <button type="submit" 
+                        class="primary"
+                        hx-post="/demo/execute"
+                        hx-target="#execution-results"
+                        hx-swap="innerHTML">
+                    Execute Command
+                </button>
+            </div>
+        </form>
+        
+        <div class="search-loading-demo htmx-indicator" style="margin: 1rem 0;">
+            <small style="color: var(--jarvis-glow-color);">Processing query...</small>
+        </div>
+        
+        <div id="search-results-demo" style="margin: 1rem 0;"></div>
+        <div id="execution-results" style="margin: 1rem 0;"></div>
+    </section>
+
+    <!-- Sample Vehicle Data -->
+    <section class="animate-on-scroll">
+        <h3>Vehicle Roster</h3>
+        <div class="grid">
+            <div class="vehicle-preview" 
+                 hx-get="/demo/vehicle/1" 
+                 hx-target="#vehicle-detail" 
+                 hx-swap="innerHTML"
+                 style="cursor: pointer;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--jarvis-glow-color);">2023 Tesla Model S Plaid</h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--muted-color);">VIN: 5YJ3E1EB9PF123456</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="system-status online">
+                        <span class="status-indicator"></span>
+                        Active Build
+                    </span>
+                    <small style="color: var(--jarvis-accent-color);">3 Projects</small>
+                </div>
+            </div>
+            
+            <div class="vehicle-preview" 
+                 hx-get="/demo/vehicle/2" 
+                 hx-target="#vehicle-detail" 
+                 hx-swap="innerHTML"
+                 style="cursor: pointer;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--jarvis-glow-color);">2022 Porsche 911 Turbo</h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--muted-color);">VIN: WP0AB2A99NS123456</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="system-status operational">
+                        <span class="status-indicator"></span>
+                        Planning Phase
+                    </span>
+                    <small style="color: var(--jarvis-accent-color);">1 Project</small>
+                </div>
+            </div>
+        </div>
+        
+        <div id="vehicle-detail" style="margin: 2rem 0;"></div>
+    </section>
+</div>
+
+<script layout:fragment="scripts">
+    // Demo-specific interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simulate real-time updates
+        setTimeout(() => {
+            window.CarBuilderVIN?.showNotification?.('Welcome to the Jarvis System Interface', 'info');
+        }, 1000);
+        
+        // Add demo data to search
+        window.demoSearchData = [
+            { type: 'vehicle', name: 'Tesla Model S Plaid', id: '1' },
+            { type: 'vehicle', name: 'Porsche 911 Turbo', id: '2' },
+            { type: 'part', name: 'Carbon Fiber Spoiler', id: '101' },
+            { type: 'part', name: 'Performance Brake Kit', id: '102' },
+            { type: 'build', name: 'Track Day Setup', id: '201' }
+        ];
+    });
+    
+    // Simulate module data loading
+    function loadModuleData(moduleType) {
+        const containers = {
+            'vehicle': '#vehicle-module-content',
+            'build': '#build-module-content',
+            'parts': '#parts-module-content'
+        };
+        
+        const data = {
+            'vehicle': '<div><strong>12 Vehicles Active</strong><br><small>Last sync: 2 minutes ago</small></div>',
+            'build': '<div><strong>27 Builds in Progress</strong><br><small>Estimated completion: Q1 2024</small></div>',
+            'parts': '<div><strong>1,247 Parts Tracked</strong><br><small>Inventory value: $2.3M</small></div>'
+        };
+        
+        const container = document.querySelector(containers[moduleType]);
+        if (container) {
+            container.innerHTML = data[moduleType];
+            container.style.justifyContent = 'flex-start';
+            container.style.alignItems = 'flex-start';
+            window.CarBuilderVIN?.showNotification?.(`${moduleType.charAt(0).toUpperCase() + moduleType.slice(1)} module data loaded`, 'success');
+        }
+    }
+    
+    // Handle module button clicks
+    document.addEventListener('htmx:beforeRequest', function(event) {
+        const url = event.detail.xhr.responseURL || '';
+        if (url.includes('/demo/vehicle-data')) {
+            event.preventDefault();
+            loadModuleData('vehicle');
+        } else if (url.includes('/demo/build-data')) {
+            event.preventDefault();
+            loadModuleData('build');
+        } else if (url.includes('/demo/parts-data')) {
+            event.preventDefault();
+            loadModuleData('parts');
+        }
+    });
+</script>
+
+</html>

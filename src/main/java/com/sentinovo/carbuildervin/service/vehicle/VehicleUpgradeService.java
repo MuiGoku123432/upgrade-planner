@@ -1,13 +1,16 @@
-package com.sentinovo.carbuildervin.services.vehicle;
+package com.sentinovo.carbuildervin.service.vehicle;
 
+import com.sentinovo.carbuildervin.dto.build.*;
+import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
 import com.sentinovo.carbuildervin.entities.vehicle.UpgradeCategory;
 import com.sentinovo.carbuildervin.entities.vehicle.Vehicle;
 import com.sentinovo.carbuildervin.entities.vehicle.VehicleUpgrade;
 import com.sentinovo.carbuildervin.exception.ResourceNotFoundException;
 import com.sentinovo.carbuildervin.exception.UnauthorizedException;
 import com.sentinovo.carbuildervin.exception.ValidationException;
+import com.sentinovo.carbuildervin.mapper.vehicle.VehicleUpgradeMapper;
 import com.sentinovo.carbuildervin.repository.vehicle.VehicleUpgradeRepository;
-import com.sentinovo.carbuildervin.services.user.AuthenticationService;
+import com.sentinovo.carbuildervin.service.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +33,7 @@ public class VehicleUpgradeService {
     private final VehicleService vehicleService;
     private final UpgradeCategoryService upgradeCategoryService;
     private final AuthenticationService authenticationService;
+    private final VehicleUpgradeMapper vehicleUpgradeMapper;
 
     @Transactional(readOnly = true)
     public VehicleUpgrade findById(UUID id) {
@@ -149,6 +153,64 @@ public class VehicleUpgradeService {
         return vehicleUpgradeRepository.findByVehicleIdAndSlug(vehicleId, slug);
     }
 
+    // ===== DTO-Based Methods =====
+
+    @Transactional(readOnly = true)
+    public VehicleUpgradeDto getVehicleUpgradeById(UUID id) {
+        VehicleUpgrade upgrade = findByIdAndValidateOwnership(id);
+        return vehicleUpgradeMapper.toDto(upgrade);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehicleUpgradeDto> getVehicleUpgradesByVehicleId(UUID vehicleId) {
+        List<VehicleUpgrade> upgrades = findByVehicleId(vehicleId);
+        return vehicleUpgradeMapper.toDtoList(upgrades);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<VehicleUpgradeDto> getVehicleUpgradesByVehicleIdPaged(UUID vehicleId, Pageable pageable) {
+        Page<VehicleUpgrade> page = findByVehicleId(vehicleId, pageable);
+        return vehicleUpgradeMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehicleUpgradeSummaryDto> getVehicleUpgradeSummariesByVehicleId(UUID vehicleId) {
+        List<VehicleUpgrade> upgrades = findByVehicleId(vehicleId);
+        return upgrades.stream()
+                .map(vehicleUpgradeMapper::toSummaryDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public VehicleUpgradeSummaryDto getVehicleUpgradeSummaryById(UUID upgradeId) {
+        VehicleUpgrade upgrade = findById(upgradeId);
+        return vehicleUpgradeMapper.toSummaryDto(upgrade);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehicleUpgradeDto> getUserVehicleUpgrades(UUID userId) {
+        List<VehicleUpgrade> upgrades = findUserUpgrades(userId);
+        return vehicleUpgradeMapper.toDtoList(upgrades);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<VehicleUpgradeDto> getUserVehicleUpgradesPaged(UUID userId, Pageable pageable) {
+        Page<VehicleUpgrade> page = findUserUpgrades(userId, pageable);
+        return vehicleUpgradeMapper.toPageDto(page);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehicleUpgradeDto> getUserVehicleUpgradesByStatus(UUID userId, String status) {
+        List<VehicleUpgrade> upgrades = findUserUpgradesByStatus(userId, status);
+        return vehicleUpgradeMapper.toDtoList(upgrades);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VehicleUpgradeDto> searchUserVehicleUpgradesByTerm(UUID userId, String searchTerm) {
+        List<VehicleUpgrade> upgrades = searchUserUpgrades(userId, searchTerm);
+        return vehicleUpgradeMapper.toDtoList(upgrades);
+    }
+
     public VehicleUpgrade createUpgrade(UUID vehicleId, Integer categoryId, String name, String description,
                                        Integer priorityLevel, LocalDate targetCompletionDate, Boolean isPrimary) {
         log.info("Creating new upgrade for vehicle: {}", vehicleId);
@@ -174,6 +236,25 @@ public class VehicleUpgradeService {
         VehicleUpgrade savedUpgrade = vehicleUpgradeRepository.save(upgrade);
         log.info("Successfully created upgrade with id: {} for vehicle: {}", savedUpgrade.getId(), vehicleId);
         return savedUpgrade;
+    }
+
+    public VehicleUpgradeDto createVehicleUpgrade(UUID vehicleId, VehicleUpgradeCreateDto createDto) {
+        log.info("Creating new upgrade for vehicle: {}", vehicleId);
+        
+        Vehicle vehicle = vehicleService.findByIdAndValidateOwnership(vehicleId);
+        UpgradeCategory category = upgradeCategoryService.findById(createDto.getCategoryId());
+        
+        if (createDto.getIsPrimaryForCategory() != null && createDto.getIsPrimaryForCategory()) {
+            validatePrimaryUpgrade(vehicleId, createDto.getCategoryId());
+        }
+        
+        VehicleUpgrade upgrade = vehicleUpgradeMapper.toEntity(createDto);
+        upgrade.setVehicle(vehicle);
+        upgrade.setUpgradeCategory(category);
+        
+        VehicleUpgrade savedUpgrade = vehicleUpgradeRepository.save(upgrade);
+        log.info("Successfully created upgrade with id: {} for vehicle: {}", savedUpgrade.getId(), vehicleId);
+        return vehicleUpgradeMapper.toDto(savedUpgrade);
     }
 
     public VehicleUpgrade updateUpgrade(UUID upgradeId, String name, String description, Integer priorityLevel,
@@ -202,6 +283,36 @@ public class VehicleUpgradeService {
         return savedUpgrade;
     }
 
+    public VehicleUpgradeDto updateVehicleUpgrade(UUID upgradeId, VehicleUpgradeUpdateDto updateDto) {
+        log.info("Updating upgrade with id: {}", upgradeId);
+        
+        VehicleUpgrade upgrade = findByIdAndValidateOwnership(upgradeId);
+        
+        // Handle category update
+        if (updateDto.getCategoryId() != null) {
+            UpgradeCategory category = upgradeCategoryService.findById(updateDto.getCategoryId());
+            upgrade.setUpgradeCategory(category);
+        }
+        
+        // Handle status transition validation
+        if (updateDto.getStatus() != null) {
+            validateStatusTransition(upgrade.getStatus(), updateDto.getStatus());
+        }
+        
+        // Handle primary upgrade validation
+        if (updateDto.getIsPrimaryForCategory() != null) {
+            if (updateDto.getIsPrimaryForCategory() && !upgrade.getIsPrimaryForCategory()) {
+                validatePrimaryUpgrade(upgrade.getVehicle().getId(), upgrade.getUpgradeCategory().getId());
+            }
+        }
+        
+        vehicleUpgradeMapper.updateEntity(upgrade, updateDto);
+        VehicleUpgrade savedUpgrade = vehicleUpgradeRepository.save(upgrade);
+        
+        log.info("Successfully updated upgrade with id: {}", savedUpgrade.getId());
+        return vehicleUpgradeMapper.toDto(savedUpgrade);
+    }
+
     public VehicleUpgrade updateUpgradeStatus(UUID upgradeId, String status) {
         log.info("Updating status for upgrade with id: {} to {}", upgradeId, status);
         
@@ -212,6 +323,18 @@ public class VehicleUpgradeService {
         VehicleUpgrade savedUpgrade = vehicleUpgradeRepository.save(upgrade);
         log.info("Successfully updated status for upgrade with id: {}", savedUpgrade.getId());
         return savedUpgrade;
+    }
+
+    public VehicleUpgradeDto updateVehicleUpgradeStatusDto(UUID upgradeId, String status) {
+        log.info("Updating status for upgrade with id: {} to {}", upgradeId, status);
+        
+        VehicleUpgrade upgrade = findByIdAndValidateOwnership(upgradeId);
+        validateStatusTransition(upgrade.getStatus(), status);
+        upgrade.setStatus(status);
+        
+        VehicleUpgrade savedUpgrade = vehicleUpgradeRepository.save(upgrade);
+        log.info("Successfully updated status for upgrade with id: {}", savedUpgrade.getId());
+        return vehicleUpgradeMapper.toDto(savedUpgrade);
     }
 
     public void deleteUpgrade(UUID upgradeId) {

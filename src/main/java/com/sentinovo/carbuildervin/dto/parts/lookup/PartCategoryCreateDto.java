@@ -30,8 +30,7 @@ public class PartCategoryCreateDto {
     @Schema(description = "Category description", example = "Suspension system components")
     private String description;
 
-    @Min(value = 1, message = "Priority value must be at least 1")
-    @Max(value = 1000, message = "Priority value cannot exceed 1000")
-    @Schema(description = "Priority value for sorting (1-1000)", example = "100")
-    private Integer priorityValue;
+    @Min(value = 1, message = "Sort order value must be at least 1")
+    @Schema(description = "Sort order for category display", example = "1")
+    private Integer sortOrder;
 }

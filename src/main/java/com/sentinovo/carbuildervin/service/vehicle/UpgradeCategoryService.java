@@ -1,9 +1,11 @@
-package com.sentinovo.carbuildervin.services.vehicle;
+package com.sentinovo.carbuildervin.service.vehicle;
 
+import com.sentinovo.carbuildervin.dto.upgrade.*;
 import com.sentinovo.carbuildervin.entities.vehicle.UpgradeCategory;
 import com.sentinovo.carbuildervin.exception.DuplicateResourceException;
 import com.sentinovo.carbuildervin.exception.InvalidStateException;
 import com.sentinovo.carbuildervin.exception.ResourceNotFoundException;
+import com.sentinovo.carbuildervin.mapper.vehicle.UpgradeCategoryMapper;
 import com.sentinovo.carbuildervin.repository.vehicle.UpgradeCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class UpgradeCategoryService {
 
     private final UpgradeCategoryRepository upgradeCategoryRepository;
+    private final UpgradeCategoryMapper upgradeCategoryMapper;
 
     @Transactional(readOnly = true)
     public UpgradeCategory findById(Integer id) {
@@ -62,6 +64,38 @@ public class UpgradeCategoryService {
         return upgradeCategoryRepository.countVehicleUpgradesByCategoryId(categoryId);
     }
 
+    // ===== DTO-Based Methods =====
+
+    @Transactional(readOnly = true)
+    public UpgradeCategoryDto getUpgradeCategoryById(Integer id) {
+        UpgradeCategory category = findById(id);
+        return upgradeCategoryMapper.toDto(category);
+    }
+
+    @Transactional(readOnly = true)
+    public UpgradeCategoryDto getUpgradeCategoryByName(String name) {
+        UpgradeCategory category = getByName(name);
+        return upgradeCategoryMapper.toDto(category);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UpgradeCategoryDto> getAllUpgradeCategories() {
+        List<UpgradeCategory> categories = findAllCategories();
+        return upgradeCategoryMapper.toDtoList(categories);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UpgradeCategoryDto> getActiveUpgradeCategories() {
+        List<UpgradeCategory> categories = findActiveCategories();
+        return upgradeCategoryMapper.toDtoList(categories);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UpgradeCategoryDto> searchUpgradeCategories(String searchTerm) {
+        List<UpgradeCategory> categories = searchCategories(searchTerm);
+        return upgradeCategoryMapper.toDtoList(categories);
+    }
+
     public UpgradeCategory createCategory(String name, String description, Boolean isActive) {
         log.info("Creating new upgrade category with name: {}", name);
         
@@ -88,6 +122,28 @@ public class UpgradeCategoryService {
         return savedCategory;
     }
 
+    public UpgradeCategoryDto createUpgradeCategory(UpgradeCategoryCreateDto createDto) {
+        log.info("Creating new upgrade category with name: {}", createDto.getName());
+        
+        validateCategoryCreation(createDto.getName());
+        
+        Integer maxSortOrder = upgradeCategoryRepository.findMaxSortOrder();
+        Integer sortOrder = (maxSortOrder != null) ? maxSortOrder + 1 : 1;
+        
+        String key = createDto.getName().toLowerCase().replaceAll("[^a-z0-9]", "_").replaceAll("_+", "_");
+        if (key.endsWith("_")) {
+            key = key.substring(0, key.length() - 1);
+        }
+        
+        UpgradeCategory category = upgradeCategoryMapper.toEntity(createDto);
+        category.setKey(key);
+        category.setSortOrder(sortOrder);
+        
+        UpgradeCategory savedCategory = upgradeCategoryRepository.save(category);
+        log.info("Successfully created upgrade category with id: {}", savedCategory.getId());
+        return upgradeCategoryMapper.toDto(savedCategory);
+    }
+
     public UpgradeCategory updateCategory(Integer categoryId, String name, String description, Boolean isActive) {
         log.info("Updating upgrade category with id: {}", categoryId);
         
@@ -109,6 +165,22 @@ public class UpgradeCategoryService {
         UpgradeCategory savedCategory = upgradeCategoryRepository.save(category);
         log.info("Successfully updated upgrade category with id: {}", savedCategory.getId());
         return savedCategory;
+    }
+
+    public UpgradeCategoryDto updateUpgradeCategory(Integer categoryId, UpgradeCategoryUpdateDto updateDto) {
+        log.info("Updating upgrade category with id: {}", categoryId);
+        
+        UpgradeCategory category = findById(categoryId);
+        
+        if (updateDto.getName() != null && !updateDto.getName().equals(category.getName())) {
+            validateCategoryNameUniqueness(updateDto.getName(), categoryId);
+        }
+        
+        upgradeCategoryMapper.updateEntity(category, updateDto);
+        UpgradeCategory savedCategory = upgradeCategoryRepository.save(category);
+        
+        log.info("Successfully updated upgrade category with id: {}", savedCategory.getId());
+        return upgradeCategoryMapper.toDto(savedCategory);
     }
 
     public UpgradeCategory updateCategorySortOrder(Integer categoryId, Integer sortOrder) {

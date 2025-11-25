@@ -1,4 +1,4 @@
-package com.sentinovo.carbuildervin.services.user;
+package com.sentinovo.carbuildervin.service.user;
 
 import com.sentinovo.carbuildervin.entities.user.Role;
 import com.sentinovo.carbuildervin.exception.DuplicateResourceException;

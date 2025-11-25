@@ -18,22 +18,16 @@ public interface UserMapper {
 
     List<UserDto> toDtoList(List<User> entities);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", ignore = true) 
     @Mapping(target = "isActive", constant = "true")
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "vehicles", ignore = true)
     User toEntity(RegisterRequestDto createDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "isActive", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "vehicles", ignore = true)
     void updateEntity(@MappingTarget User entity, UserUpdateDto updateDto);

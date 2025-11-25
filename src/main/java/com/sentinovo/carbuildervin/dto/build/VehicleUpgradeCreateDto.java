@@ -21,9 +21,9 @@ import java.time.LocalDate;
 @Schema(description = "Request to create a new vehicle build")
 public class VehicleUpgradeCreateDto {
 
-    @NotNull(message = "Upgrade category ID is required")
-    @Schema(description = "Upgrade category ID", example = "1")
-    private Integer upgradeCategoryId;
+    @NotNull(message = "Category ID is required")
+    @Schema(description = "Category ID", example = "1")
+    private Integer categoryId;
 
     @NotBlank(message = "Build name is required")
     @Size(max = 200, message = "Name cannot exceed 200 characters")

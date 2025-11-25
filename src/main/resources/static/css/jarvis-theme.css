@@ -1,0 +1,376 @@
+/*
+  Jarvis Theme for Car Builder VIN System
+  A dark, futuristic theme with electric blue accents
+  Based on Pico CSS framework with custom overrides
+*/
+
+/* Import HTMX styles for transitions */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
+}
+
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+
+/* Jarvis Theme Variables Override */
+:root[data-theme="dark"] {
+    /* --- Main Background & Text --- */
+    --background-color: #0a0c10;  /* Very dark, almost black blue */
+    --color: #E0E6F0;             /* Main text: light, slightly blue-white */
+    
+    /* --- Headings --- */
+    --h1-color: #FFFFFF;
+    --h2-color: #F5F5F5;
+    --h3-color: #ECECEC;
+    --h4-color: #E0E0E0;
+    --h5-color: #D5D5D5;
+    --h6-color: #CCCCCC;
+
+    /* --- Primary "Jarvis Blue" --- */
+    --primary: #00BFFF;           /* Bright electronic sky blue */
+    --primary-hover: #33CCFF;     /* Lighter, more vibrant blue */
+    --primary-focus: rgba(0, 191, 255, 0.25);
+    --primary-inverse: #031018;   /* Text color on primary button */
+
+    /* --- Secondary Colors --- */
+    --secondary: #334150;
+    --secondary-hover: #445566;
+    --secondary-focus: rgba(51, 65, 80, 0.25);
+    --secondary-inverse: #E0E6F0;
+
+    /* --- UI Elements --- */
+    --muted-color: #7a8c99;       /* Muted grey-blue for secondary text */
+    --muted-border-color: #222b36; /* Borders, <hr> */
+
+    /* --- Cards --- */
+    --card-background-color: #12161d; /* Slightly lighter than main bg */
+    --card-border-color: #222b36;
+    --card-box-shadow: 
+        0 0.125rem 1rem rgba(0, 150, 255, 0.1), 
+        0 0.0625rem 0.125rem rgba(0, 0, 0, 0.15);
+
+    /* --- Forms --- */
+    --form-element-background-color: #12161d;
+    --form-element-border-color: #334150;
+    --form-element-placeholder-color: #7a8c99;
+    --form-element-active-border-color: var(--primary);
+    --form-element-focus-color: var(--primary-focus);
+
+    /* --- Code Blocks --- */
+    --code-background-color: #1a2029;
+    --code-color: #c9d1d9;
+    --code-inline-background-color: #1a2029;
+
+    /* --- Navigation --- */
+    --nav-link-color: var(--color);
+    --nav-link-hover-color: var(--primary);
+
+    /* --- Custom Jarvis Variables --- */
+    --jarvis-glow-color: #00BFFF;
+    --jarvis-accent-color: #00D4FF;
+    --jarvis-warning-color: #FFB800;
+    --jarvis-success-color: #00FF88;
+    --jarvis-danger-color: #FF4444;
+}
+
+/* Custom Jarvis Components */
+
+/* System Status Indicators */
+.system-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.system-status.online {
+    background-color: rgba(0, 255, 136, 0.15);
+    color: var(--jarvis-success-color);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.system-status.operational {
+    background-color: rgba(0, 191, 255, 0.15);
+    color: var(--jarvis-glow-color);
+    border: 1px solid rgba(0, 191, 255, 0.3);
+}
+
+.system-status.warning {
+    background-color: rgba(255, 184, 0, 0.15);
+    color: var(--jarvis-warning-color);
+    border: 1px solid rgba(255, 184, 0, 0.3);
+}
+
+/* Status indicator pulse animation */
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Enhanced Navigation */
+.navbar {
+    background-color: rgba(18, 22, 29, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--muted-border-color);
+    padding: 1rem 0;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--jarvis-glow-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-brand::before {
+    content: "⚡";
+    font-size: 1.2em;
+}
+
+.navbar-nav {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-nav a {
+    color: var(--color);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.navbar-nav a:hover,
+.navbar-nav a:focus {
+    color: var(--jarvis-glow-color);
+}
+
+.navbar-nav a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--jarvis-glow-color), var(--jarvis-accent-color));
+}
+
+/* Enhanced Cards */
+.jarvis-card {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-box-shadow);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.jarvis-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        var(--jarvis-glow-color), 
+        var(--jarvis-accent-color),
+        transparent
+    );
+}
+
+.jarvis-card:hover {
+    border-color: rgba(0, 191, 255, 0.4);
+    box-shadow: 
+        var(--card-box-shadow),
+        0 0 20px rgba(0, 191, 255, 0.1);
+}
+
+/* Module Cards */
+.module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.module-card {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--jarvis-glow-color);
+    box-shadow: 0 8px 25px rgba(0, 191, 255, 0.15);
+}
+
+.module-header {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, 
+        rgba(0, 191, 255, 0.1), 
+        rgba(0, 212, 255, 0.05)
+    );
+    border-bottom: 1px solid var(--muted-border-color);
+    font-weight: 600;
+    color: var(--jarvis-glow-color);
+}
+
+.module-content {
+    padding: 1.5rem;
+}
+
+.module-footer {
+    padding: 1rem 1.5rem;
+    background: rgba(18, 22, 29, 0.5);
+    border-top: 1px solid var(--muted-border-color);
+}
+
+/* Enhanced Forms */
+.jarvis-form {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--card-box-shadow);
+}
+
+.jarvis-form input:focus,
+.jarvis-form select:focus,
+.jarvis-form textarea:focus {
+    border-color: var(--jarvis-glow-color);
+    box-shadow: 
+        0 0 0 var(--outline-width) var(--form-element-focus-color),
+        0 0 10px rgba(0, 191, 255, 0.2);
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--jarvis-glow-color);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Data Tables */
+.data-table {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.data-table th {
+    background: linear-gradient(135deg, 
+        rgba(0, 191, 255, 0.1), 
+        rgba(0, 212, 255, 0.05)
+    );
+    color: var(--jarvis-glow-color);
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--muted-border-color);
+}
+
+.data-table tr:hover td {
+    background: rgba(0, 191, 255, 0.05);
+}
+
+/* Utility Classes */
+.text-jarvis { color: var(--jarvis-glow-color); }
+.text-accent { color: var(--jarvis-accent-color); }
+.text-success { color: var(--jarvis-success-color); }
+.text-warning { color: var(--jarvis-warning-color); }
+.text-danger { color: var(--jarvis-danger-color); }
+
+.glow {
+    text-shadow: 0 0 10px currentColor;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .navbar-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .module-grid {
+        grid-template-columns: 1fr;
+    }
+}

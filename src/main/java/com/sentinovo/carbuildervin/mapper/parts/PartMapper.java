@@ -15,41 +15,39 @@ import java.util.List;
 public interface PartMapper {
 
     @Mapping(target = "vehicleUpgradeId", source = "vehicleUpgrade.id")
-    @Mapping(target = "categoryId", source = "partCategory.code") // PartCategory uses code as primary key
-    @Mapping(target = "categoryName", source = "partCategory.label") // Entity uses 'label' not 'name'
-    @Mapping(target = "tierId", source = "partTier.code") // PartTier uses code as primary key
-    @Mapping(target = "tierName", source = "partTier.label") // Entity uses 'label' not 'name'
-    @Mapping(target = "link", source = "productUrl") // Entity uses 'productUrl' not 'link'
+    @Mapping(target = "categoryCode", source = "partCategory.code")
+    @Mapping(target = "categoryName", source = "partCategory.label")
+    @Mapping(target = "tierCode", source = "partTier.code")
+    @Mapping(target = "tierName", source = "partTier.label")
+    @Mapping(target = "productUrl", source = "productUrl")
     PartDto toDto(Part entity);
 
     List<PartDto> toDtoList(List<Part> entities);
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "vehicleUpgrade", ignore = true)
     @Mapping(target = "partCategory", ignore = true)
     @Mapping(target = "partTier", ignore = true)
-    @Mapping(target = "productUrl", source = "link") // Entity uses 'productUrl' not 'link'
-    @Mapping(target = "quantity", defaultValue = "1")
+    @Mapping(target = "productUrl", source = "productUrl")
     @Mapping(target = "subParts", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     Part toEntity(PartCreateDto createDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "vehicleUpgrade", ignore = true)
     @Mapping(target = "partCategory", ignore = true)
     @Mapping(target = "partTier", ignore = true)
-    @Mapping(target = "productUrl", source = "link") // Entity uses 'productUrl' not 'link'
+    @Mapping(target = "productUrl", source = "productUrl")
     @Mapping(target = "subParts", ignore = true)
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntity(@MappingTarget Part entity, PartUpdateDto updateDto);
 
     @Mapping(target = "vehicleUpgradeId", source = "vehicleUpgrade.id")
-    @Mapping(target = "categoryName", source = "partCategory.label") // Entity uses 'label' not 'name'
-    @Mapping(target = "tierName", source = "partTier.label") // Entity uses 'label' not 'name'
-    @Mapping(target = "totalPrice", expression = "java(entity.getPrice() != null ? entity.getPrice().multiply(java.math.BigDecimal.valueOf(entity.getQuantity())) : null)")
+    @Mapping(target = "categoryName", source = "partCategory.label")
+    @Mapping(target = "tierName", source = "partTier.label")
+    @Mapping(target = "partNumber", ignore = true)
+    @Mapping(target = "quantity", constant = "1")
+    @Mapping(target = "totalPrice", expression = "java(entity.getPrice() != null ? entity.getPrice() : null)")
     PartSummaryDto toSummaryDto(Part entity);
 
     default PageResponseDto<PartDto> toPageDto(Page<Part> page) {
