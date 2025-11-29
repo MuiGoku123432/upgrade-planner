@@ -1,0 +1,586 @@
+/*
+  Components CSS - Reusable UI Components
+  Unified badge, card, button, form, and modal systems
+*/
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+
+.navbar {
+    background-color: var(--card-background-color);
+    border-bottom: 1px solid var(--muted-border-color);
+    padding: 1rem 0;
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color);
+    text-decoration: none;
+}
+
+.navbar-brand:hover {
+    color: var(--primary);
+}
+
+.navbar-nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.navbar-nav a {
+    color: var(--color);
+    text-decoration: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-md);
+}
+
+.navbar-nav a:hover {
+    background-color: var(--secondary);
+    color: var(--primary);
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.username {
+    color: var(--color);
+    font-weight: 500;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+.logout-btn {
+    background: var(--secondary);
+    color: var(--secondary-inverse);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+    background: var(--secondary-hover);
+}
+
+.guest-section {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-btn {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    font-size: 0.9rem;
+}
+
+.nav-btn-secondary {
+    background: var(--secondary);
+    color: var(--secondary-inverse);
+}
+
+.nav-btn-secondary:hover {
+    background: var(--secondary-hover);
+}
+
+.nav-btn-primary {
+    background: var(--primary);
+    color: var(--primary-inverse);
+}
+
+.nav-btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+/* Navigation Responsive */
+@media (max-width: 768px) {
+    .navbar-container {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .navbar-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+}
+
+/* ============================================
+   UNIFIED CARD SYSTEM
+   ============================================ */
+
+/* Card Base */
+.card {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+/* Card Modifiers */
+.card--clickable {
+    cursor: pointer;
+}
+
+.card--clickable:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.card--selected {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow-strong);
+    background: rgba(0, 191, 255, 0.05);
+}
+
+.card--center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.card--dashed {
+    border-style: dashed;
+    border-width: 2px;
+}
+
+.card--padded {
+    padding: 1.5rem;
+}
+
+.card--padded-lg {
+    padding: 2rem;
+}
+
+/* Legacy card support - maps to new system */
+.jarvis-card {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+}
+
+.jarvis-form {
+    background: var(--card-background-color);
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+}
+
+.jarvis-form input:focus,
+.jarvis-form select:focus,
+.jarvis-form textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 var(--outline-width) var(--form-element-focus-color);
+}
+
+/* ============================================
+   UNIFIED BADGE SYSTEM
+   ============================================ */
+
+/* Badge Base */
+.badge {
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    display: inline-block;
+}
+
+/* Badge Variants */
+.badge--primary {
+    background: var(--primary);
+    color: var(--primary-inverse);
+}
+
+.badge--secondary {
+    background: var(--secondary);
+    color: var(--secondary-inverse);
+}
+
+.badge--success {
+    background: var(--color-success);
+    color: #1a1a1a;
+}
+
+.badge--warning {
+    background: var(--color-warning);
+    color: #1a1a1a;
+}
+
+.badge--error {
+    background: var(--color-error);
+    color: white;
+}
+
+.badge--muted {
+    background: var(--muted-border-color);
+    color: var(--muted-color);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.jarvis-theme .btn {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.jarvis-theme .btn-primary {
+    background: var(--primary);
+    color: var(--primary-inverse);
+}
+
+.jarvis-theme .btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.jarvis-theme .btn-secondary {
+    background: var(--secondary);
+    color: var(--secondary-inverse);
+    border: 1px solid var(--border-color);
+}
+
+.jarvis-theme .btn-secondary:hover {
+    background: var(--secondary-hover);
+}
+
+/* Small button variant */
+.action-buttons button.small,
+.vehicle-actions button.small,
+.build-actions button.small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+
+.jarvis-theme .form-group {
+    margin-bottom: 1rem;
+}
+
+.jarvis-theme .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.jarvis-theme .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color);
+}
+
+.jarvis-theme .required {
+    color: var(--color-error);
+}
+
+.jarvis-theme .form-group input,
+.jarvis-theme .form-group textarea,
+.jarvis-theme .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--background-color);
+    color: var(--color);
+    font-size: 1rem;
+}
+
+.jarvis-theme .form-group input:focus,
+.jarvis-theme .form-group textarea:focus,
+.jarvis-theme .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-focus);
+}
+
+.jarvis-theme .form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted-color);
+}
+
+/* Checkbox */
+.jarvis-theme .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.jarvis-theme .checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+/* Status Select (inline in tables) */
+.status-select {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--background-color);
+    color: var(--color);
+    cursor: pointer;
+}
+
+.status-select:hover {
+    border-color: var(--primary);
+}
+
+/* Filters and Controls */
+.filters select,
+.jarvis-select {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--card-border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--card-background-color);
+    color: var(--color);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.filters select:hover,
+.jarvis-select:hover {
+    border-color: var(--primary);
+}
+
+.filters select:focus,
+.jarvis-select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-focus);
+}
+
+/* Form Responsive */
+@media (max-width: 768px) {
+    .jarvis-theme .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+
+.jarvis-theme.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.jarvis-theme .modal-dialog {
+    background: var(--card-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-modal);
+}
+
+.jarvis-theme .modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.jarvis-theme .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.jarvis-theme .modal-header h4 {
+    margin: 0;
+    color: var(--color);
+}
+
+.jarvis-theme .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--muted-color);
+    cursor: pointer;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.jarvis-theme .modal-close:hover {
+    color: var(--color);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.jarvis-theme .modal-body {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.jarvis-theme .modal-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.jarvis-theme .modal-subtitle {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+    color: var(--muted-color);
+}
+
+/* Modal Responsive */
+@media (max-width: 768px) {
+    .jarvis-theme.modal {
+        padding: 0.5rem;
+    }
+
+    .jarvis-theme .modal-footer {
+        flex-direction: column-reverse;
+    }
+
+    .jarvis-theme .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+
+.jarvis-theme .alert {
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+    border: 1px solid;
+    margin-bottom: 1rem;
+}
+
+.jarvis-theme .alert-error {
+    background: rgba(255, 68, 68, 0.1);
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.jarvis-theme .alert-success {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.jarvis-theme .alert-warning {
+    background: rgba(255, 149, 0, 0.1);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+
+.action-buttons,
+.vehicle-actions,
+.build-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+/* Prevent button clicks from toggling accordion */
+.vehicle-actions,
+.build-actions {
+    z-index: 1;
+}
+
+/* ============================================
+   EMPTY STATES
+   ============================================ */
+
+.jarvis-theme .empty-state {
+    max-width: 500px;
+    margin: 3rem auto;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--card-background-color);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--muted-color);
+}
+
+.jarvis-theme .empty-state h3,
+.jarvis-theme .empty-state h4 {
+    margin: 0;
+    color: var(--color);
+}
+
+.jarvis-theme .empty-state p {
+    margin: 0;
+    max-width: 350px;
+}

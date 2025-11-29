@@ -10,6 +10,8 @@ import com.sentinovo.carbuildervin.exception.UnauthorizedException;
 import com.sentinovo.carbuildervin.exception.ValidationException;
 import com.sentinovo.carbuildervin.mapper.vehicle.VehicleMapper;
 import com.sentinovo.carbuildervin.repository.vehicle.VehicleRepository;
+import com.sentinovo.carbuildervin.service.external.VinDecodingService;
+import com.sentinovo.carbuildervin.service.external.VinDecodingService.VinDecodingResponse;
 import com.sentinovo.carbuildervin.service.user.AuthenticationService;
 import com.sentinovo.carbuildervin.service.user.UserService;
 import com.sentinovo.carbuildervin.validation.ValidationUtils;
@@ -35,6 +37,7 @@ public class VehicleService {
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final VehicleMapper vehicleMapper;
+    private final VinDecodingService vinDecodingService;
 
     @Transactional(readOnly = true)
     public Vehicle findById(UUID id) {
@@ -192,16 +195,50 @@ public class VehicleService {
 
     public VehicleDto createVehicle(VehicleCreateDto createDto) {
         log.info("Creating new vehicle for current user");
-        
+
         User owner = authenticationService.getCurrentUserOrThrow();
-        
+
         String vin = createDto.getVin();
-        if (vin != null) {
+        if (vin != null && !vin.trim().isEmpty()) {
             validateVin(vin);
             vin = vin.trim().toUpperCase();
             validateVinUniqueness(vin);
+
+            // Auto-populate from VIN if fields are missing
+            boolean needsDecode = createDto.getYear() == null
+                    || createDto.getMake() == null || createDto.getMake().trim().isEmpty()
+                    || createDto.getModel() == null || createDto.getModel().trim().isEmpty();
+
+            if (needsDecode) {
+                try {
+                    log.debug("Auto-populating vehicle details from VIN: {}", vin);
+                    VinDecodingResponse decoded = vinDecodingService.decodeVin(vin);
+
+                    // Only fill in missing fields (don't override user input)
+                    if (createDto.getYear() == null) {
+                        createDto.setYear(decoded.getYear());
+                    }
+                    if (createDto.getMake() == null || createDto.getMake().trim().isEmpty()) {
+                        createDto.setMake(decoded.getMake());
+                    }
+                    if (createDto.getModel() == null || createDto.getModel().trim().isEmpty()) {
+                        createDto.setModel(decoded.getModel());
+                    }
+                    if (createDto.getTrim() == null || createDto.getTrim().trim().isEmpty()) {
+                        createDto.setTrim(decoded.getTrim());
+                    }
+
+                    log.info("VIN decode populated: {} {} {} {}",
+                            decoded.getYear(), decoded.getMake(), decoded.getModel(), decoded.getTrim());
+                } catch (Exception e) {
+                    log.warn("VIN decode failed during vehicle creation, continuing with provided data: {}", e.getMessage());
+                    // Don't fail vehicle creation if decode fails
+                }
+            }
+        } else {
+            vin = null;
         }
-        
+
         Vehicle vehicle = vehicleMapper.toEntity(createDto);
         vehicle.setOwner(owner);
         vehicle.setVin(vin);

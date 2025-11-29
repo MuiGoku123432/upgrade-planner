@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Request to create a new vehicle")
 public class VehicleCreateDto {
 
-    @Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$", message = "VIN must be 17 characters and contain valid characters")
+    @Pattern(regexp = "^$|^[A-HJ-NPR-Z0-9]{17}$", message = "VIN must be 17 characters and contain valid characters")
     @Schema(description = "Vehicle Identification Number (optional)", example = "JTEVA5AR9S5004482")
     private String vin;
 

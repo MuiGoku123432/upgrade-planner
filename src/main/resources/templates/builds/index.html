@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Builds - Car Builder VIN</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+    <link rel="stylesheet" th:href="@{/css/builds.css}">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" class="contrast"><strong>Car Builder VIN</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/builds" class="contrast">Builds</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span sec:authentication="name">User</span>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="outline contrast">Logout</button>
+                </form>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/login" role="button" class="outline">Login</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/signup" role="button">Sign Up</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="jarvis-theme container">
+        <!-- Page Header -->
+        <header>
+            <hgroup>
+                <h1>Vehicle Builds</h1>
+                <p th:if="${vehicleCount > 0}">
+                    You have <strong th:text="${vehicleCount}">0</strong> vehicle(s) in your garage.
+                </p>
+                <p th:if="${vehicleCount == 0}">
+                    Get started by adding your first vehicle.
+                </p>
+            </hgroup>
+            <button hx-get="/builds/modals/add-vehicle"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                + Add Vehicle
+            </button>
+        </header>
+
+        <!-- Vehicle Accordions - reloads when vehicle/build events fire -->
+        <section th:if="${not #lists.isEmpty(userVehicles)}"
+                 class="vehicles-section"
+                 id="vehicles-section"
+                 hx-get="/builds"
+                 hx-trigger="vehicleCreated from:body, vehicleUpdated from:body, buildCreated from:body, buildUpdated from:body"
+                 hx-select="#vehicles-section"
+                 hx-swap="outerHTML"
+                 hx-disinherit="*">
+            <details th:each="vehicle : ${userVehicles}" class="vehicle-accordion">
+                <summary>
+                    <div class="vehicle-summary">
+                        <strong th:text="${vehicle.nickname ?: (vehicle.year + ' ' + vehicle.make + ' ' + vehicle.model)}">Vehicle Name</strong>
+                        <small th:if="${vehicle.vin}"
+                               th:text="'VIN: ' + ${vehicle.vin}"
+                               class="vin-display">VIN</small>
+                        <small th:unless="${vehicle.vin}"
+                               class="project-badge">Project Vehicle</small>
+                        <span class="vehicle-actions" onclick="event.stopPropagation();">
+                            <button class="outline secondary small"
+                                    th:hx-get="@{/vehicles/{id}/edit(id=${vehicle.id})}"
+                                    hx-target="#modal-container"
+                                    hx-swap="innerHTML"
+                                    title="Edit Vehicle">Edit</button>
+                            <button class="outline secondary small"
+                                    th:hx-delete="@{/vehicles/{id}(id=${vehicle.id})}"
+                                    hx-include="#csrf-token"
+                                    hx-confirm="Delete this vehicle and all its builds?"
+                                    hx-target="closest details"
+                                    hx-swap="outerHTML"
+                                    title="Delete Vehicle">Del</button>
+                        </span>
+                    </div>
+                </summary>
+
+                <!-- Lazy load builds on accordion open -->
+                <div th:hx-get="@{/builds/vehicle/{id}/builds(id=${vehicle.id})}"
+                     hx-trigger="toggle once from:closest details"
+                     hx-swap="innerHTML"
+                     hx-select="unset"
+                     class="vehicle-content">
+                    <article aria-busy="true">Loading builds...</article>
+                </div>
+            </details>
+        </section>
+
+        <!-- Empty state when no vehicles -->
+        <article th:if="${#lists.isEmpty(userVehicles)}" class="empty-state">
+            <header>
+                <h3>Welcome to Vehicle Builds</h3>
+            </header>
+            <p>Start by adding your first vehicle to begin planning your builds and tracking parts.</p>
+            <footer>
+                <button hx-get="/builds/modals/add-vehicle"
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML">
+                    Add Your First Vehicle
+                </button>
+            </footer>
+        </article>
+    </main>
+
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <!-- Global CSRF Token for HTMX requests -->
+    <input type="hidden" id="csrf-token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</body>
+</html>

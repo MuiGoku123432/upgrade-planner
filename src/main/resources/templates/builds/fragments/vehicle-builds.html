@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Vehicle Builds Fragment - Nested build accordions for a vehicle -->
+<th:block th:fragment="vehicle-builds">
+    <div class="builds-container">
+        <!-- Add Build Button -->
+        <div class="builds-header">
+            <button class="outline"
+                    th:hx-get="@{/builds/modals/add-build(vehicleId=${vehicleId})}"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                + Add Build
+            </button>
+        </div>
+
+        <!-- Build Accordions -->
+        <th:block th:if="${not #lists.isEmpty(builds)}">
+            <details th:each="build : ${builds}" class="build-accordion">
+                <summary>
+                    <div class="build-summary">
+                        <strong th:text="${build.name}">Build Name</strong>
+                        <span class="build-meta">
+                            <span th:if="${build.upgradeCategoryName}"
+                                  th:text="${build.upgradeCategoryName}"
+                                  class="badge badge--primary">Category</span>
+                            <span th:text="${build.status}"
+                                  th:class="${build.status == 'PLANNED' ? 'badge badge--secondary' : (build.status == 'IN_PROGRESS' ? 'badge badge--warning' : 'badge badge--success')}">Status</span>
+                        </span>
+                        <span class="build-actions" onclick="event.stopPropagation();">
+                            <button class="outline secondary small"
+                                    th:hx-get="@{/builds/modals/edit-build(buildId=${build.id})}"
+                                    hx-target="#modal-container"
+                                    hx-swap="innerHTML"
+                                    title="Edit Build">Edit</button>
+                            <button class="outline secondary small"
+                                    th:hx-delete="@{/builds/build/{id}(id=${build.id})}"
+                                    hx-include="#csrf-token"
+                                    hx-confirm="Delete this build and all its parts?"
+                                    hx-target="closest details"
+                                    hx-swap="outerHTML"
+                                    title="Delete Build">Del</button>
+                        </span>
+                    </div>
+                </summary>
+
+                <!-- Lazy load parts table on open -->
+                <div th:hx-get="@{/builds/{buildId}/parts-table(buildId=${build.id})}"
+                     hx-trigger="toggle once from:closest details"
+                     hx-swap="innerHTML"
+                     hx-select="unset"
+                     class="parts-container">
+                    <progress></progress>
+                </div>
+            </details>
+        </th:block>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(builds)}" class="empty-state">
+            <p>No builds yet. Create your first build to start planning upgrades.</p>
+        </div>
+    </div>
+</th:block>
+
+</html>

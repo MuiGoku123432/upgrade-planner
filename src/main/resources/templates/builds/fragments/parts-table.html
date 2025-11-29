@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Parts Table Fragment - Table of parts for a build -->
+<th:block th:fragment="parts-table">
+    <div class="parts-table-container"
+         th:hx-get="@{/builds/{buildId}/parts-table(buildId=${buildId})}"
+         hx-trigger="partCreated from:body, partUpdated from:body"
+         hx-swap="outerHTML"
+         hx-select="unset">
+        <!-- Add Part Button -->
+        <div class="parts-header">
+            <button class="outline secondary"
+                    th:hx-get="@{/builds/modals/add-part(buildId=${buildId})}"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                + Add Part
+            </button>
+        </div>
+
+        <!-- Parts Table -->
+        <th:block th:if="${not #lists.isEmpty(parts)}">
+            <figure>
+                <table role="grid">
+                    <thead>
+                        <tr>
+                            <th scope="col">Part</th>
+                            <th scope="col">Brand</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Priority</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="part : ${parts}">
+                            <td>
+                                <a th:if="${part.productUrl}"
+                                   th:href="${part.productUrl}"
+                                   th:text="${part.name}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="part-link"><strong>Part Name</strong></a>
+                                <strong th:unless="${part.productUrl}" th:text="${part.name}">Part Name</strong>
+                                <br th:if="${part.partNumber}"/>
+                                <small th:if="${part.partNumber}"
+                                       th:text="'#' + ${part.partNumber}"
+                                       class="text-muted">Part Number</small>
+                            </td>
+                            <td th:text="${part.brand ?: '-'}">Brand</td>
+                            <td>
+                                <span th:if="${part.categoryName}"
+                                      th:text="${part.categoryName}"
+                                      class="badge badge--primary">Category</span>
+                                <span th:unless="${part.categoryName}">-</span>
+                            </td>
+                            <td>
+                                <select th:id="'status-' + ${part.id}"
+                                        th:hx-patch="@{/parts/{id}/status(id=${part.id})}"
+                                        hx-target="closest tr"
+                                        hx-swap="outerHTML"
+                                        hx-include="#csrf-token"
+                                        class="status-select">
+                                    <option value="PLANNED" th:selected="${part.status == 'PLANNED'}">Planned</option>
+                                    <option value="ORDERED" th:selected="${part.status == 'ORDERED'}">Ordered</option>
+                                    <option value="SHIPPED" th:selected="${part.status == 'SHIPPED'}">Shipped</option>
+                                    <option value="RECEIVED" th:selected="${part.status == 'RECEIVED'}">Received</option>
+                                    <option value="INSTALLED" th:selected="${part.status == 'INSTALLED'}">Installed</option>
+                                </select>
+                            </td>
+                            <td>
+                                <span th:if="${part.price}"
+                                      th:text="'$' + ${#numbers.formatDecimal(part.price, 1, 2)}">$0.00</span>
+                                <span th:unless="${part.price}">-</span>
+                            </td>
+                            <td>
+                                <span th:text="'P' + ${part.priorityValue ?: 99}"
+                                      class="badge badge--primary">P1</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="outline secondary small"
+                                            th:hx-get="@{/builds/modals/edit-part(partId=${part.id})}"
+                                            hx-target="#modal-container"
+                                            hx-swap="innerHTML"
+                                            title="Edit">Edit</button>
+                                    <button class="outline secondary small"
+                                            th:hx-delete="@{/parts/{id}(id=${part.id})}"
+                                            hx-include="#csrf-token"
+                                            hx-confirm="Delete this part?"
+                                            hx-target="closest tr"
+                                            hx-swap="outerHTML swap:1s"
+                                            title="Delete">Del</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </figure>
+        </th:block>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(parts)}" class="empty-state">
+            <p>No parts yet. Add parts to start tracking your build.</p>
+        </div>
+    </div>
+</th:block>
+
+</html>
