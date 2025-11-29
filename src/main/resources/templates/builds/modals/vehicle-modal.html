@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <!-- Vehicle Modal -->
-<div class="jarvis-theme modal" style="display: block;"
+<div class="jarvis-theme modal"
      hx-on:click="if(event.target===this) document.getElementById('modal-container').innerHTML=''">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -12,7 +12,7 @@
                         hx-on:click="document.getElementById('modal-container').innerHTML=''">&times;</button>
             </div>
             
-            <form th:attr="hx-put=${isEdit} ? @{/builds/vehicle/{id}(id=${vehicle.id})} : null,
+            <form th:attr="hx-put=${isEdit} ? @{/builds/vehicle/{id}(id=${vehicleId})} : null,
                          hx-post=${isEdit} ? null : '/builds/vehicle'"
                   hx-target="#modal-container"
                   hx-swap="innerHTML"

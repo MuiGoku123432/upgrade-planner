@@ -409,7 +409,7 @@
    MODALS
    ============================================ */
 
-.jarvis-theme .modal {
+.jarvis-theme.modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -494,7 +494,7 @@
 
 /* Modal Responsive */
 @media (max-width: 768px) {
-    .jarvis-theme .modal {
+    .jarvis-theme.modal {
         padding: 0.5rem;
     }
 
