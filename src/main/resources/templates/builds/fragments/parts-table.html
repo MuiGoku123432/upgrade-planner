@@ -36,7 +36,13 @@
                     <tbody>
                         <tr th:each="part : ${parts}">
                             <td>
-                                <strong th:text="${part.name}">Part Name</strong>
+                                <a th:if="${part.productUrl}"
+                                   th:href="${part.productUrl}"
+                                   th:text="${part.name}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="part-link"><strong>Part Name</strong></a>
+                                <strong th:unless="${part.productUrl}" th:text="${part.name}">Part Name</strong>
                                 <br th:if="${part.partNumber}"/>
                                 <small th:if="${part.partNumber}"
                                        th:text="'#' + ${part.partNumber}"
