@@ -290,12 +290,17 @@ public class PartService {
 
     public PartDto createPart(UUID upgradeId, PartCreateDto createDto) {
         log.info("Creating new part for upgrade: {}", upgradeId);
-        
+
         VehicleUpgrade upgrade = vehicleUpgradeService.findByIdAndValidateOwnership(upgradeId);
-        
+
         Part part = partMapper.toEntity(createDto);
         part.setVehicleUpgrade(upgrade);
-        
+
+        // Convert empty productUrl to null (validation requires http:// or https://)
+        if (part.getProductUrl() != null && part.getProductUrl().trim().isEmpty()) {
+            part.setProductUrl(null);
+        }
+
         // Set category if provided
         if (createDto.getCategoryCode() != null) {
             PartCategory category = partCategoryService.findByCode(createDto.getCategoryCode());

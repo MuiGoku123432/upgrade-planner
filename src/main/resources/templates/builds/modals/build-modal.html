@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Build Modal -->
+<div class="modal" style="display: block;"
+     hx-on:click="if(event.target===this) document.getElementById('modal-container').innerHTML=''">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 th:text="${isEdit} ? 'Edit Build' : 'Add Build'">Add Build</h4>
+                    <p class="modal-subtitle" th:text="'for ' + ${selectedVehicle.nickname ?: (selectedVehicle.year + ' ' + selectedVehicle.make + ' ' + selectedVehicle.model)}">for Vehicle</p>
+                </div>
+                <button type="button" class="modal-close"
+                        hx-on:click="document.getElementById('modal-container').innerHTML=''">&times;</button>
+            </div>
+
+            <form th:attr="hx-put=${isEdit} ? @{/builds/build/{id}(id=${buildId})} : null,
+                         hx-post=${isEdit} ? null : '/builds/build'"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML">
+
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="modal-body">
+                    <!-- Error Messages -->
+                    <div th:if="${error}" class="alert alert-error" style="color: #ff4444; margin-bottom: 1rem;">
+                        <span th:text="${error}">Error message</span>
+                    </div>
+
+                    <!-- Hidden vehicle ID (for create) -->
+                    <input type="hidden" name="vehicleId" th:value="${selectedVehicle.id}">
+
+                    <!-- Build Name -->
+                    <div class="form-group">
+                        <label for="name">Build Name <span class="required">*</span></label>
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               th:value="${build.name}"
+                               placeholder="e.g., Overland Build v1, Track Setup"
+                               maxlength="150"
+                               required>
+                        <small class="form-text">
+                            A descriptive name for this build
+                        </small>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group">
+                        <label for="categoryId">Build Category <span class="required">*</span></label>
+                        <select id="categoryId"
+                                name="categoryId"
+                                required>
+                            <option value="">Select a category...</option>
+                            <option th:each="category : ${upgradeCategories}"
+                                    th:value="${category.id}"
+                                    th:text="${category.name}"
+                                    th:selected="${(isEdit ? build.upgradeCategoryId : build.categoryId) == category.id}">
+                                Category
+                            </option>
+                        </select>
+                        <small class="form-text">
+                            The primary focus of this build
+                        </small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description"
+                                  name="description"
+                                  rows="3"
+                                  th:text="${build.description}"
+                                  placeholder="Describe the goals and scope of this build..."
+                                  maxlength="1000"></textarea>
+                    </div>
+
+                    <!-- Priority Level and Target Date -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="priorityLevel">Priority Level <span class="required">*</span></label>
+                            <select id="priorityLevel"
+                                    name="priorityLevel"
+                                    required>
+                                <option value="">Select priority...</option>
+                                <option value="1" th:selected="${build.priorityLevel == 1}">1 - Highest</option>
+                                <option value="2" th:selected="${build.priorityLevel == 2}">2 - High</option>
+                                <option value="3" th:selected="${build.priorityLevel == 3}">3 - Medium</option>
+                                <option value="4" th:selected="${build.priorityLevel == 4}">4 - Low</option>
+                                <option value="5" th:selected="${build.priorityLevel == 5}">5 - Lowest</option>
+                            </select>
+                            <small class="form-text">
+                                How important is this build?
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetCompletionDate">Target Completion</label>
+                            <input type="date"
+                                   id="targetCompletionDate"
+                                   name="targetCompletionDate"
+                                   th:value="${build.targetCompletionDate}">
+                            <small class="form-text">
+                                When do you want to finish this build?
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Status and Primary Build -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="PLANNED" th:selected="${build.status == null || build.status == 'PLANNED'}">Planned</option>
+                                <option value="IN_PROGRESS" th:selected="${build.status == 'IN_PROGRESS'}">In Progress</option>
+                                <option value="COMPLETED" th:selected="${build.status == 'COMPLETED'}">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox"
+                                       name="isPrimaryForCategory"
+                                       value="true"
+                                       th:checked="${build.isPrimaryForCategory}">
+                                Primary build for this category
+                            </label>
+                            <small class="form-text">
+                                Mark as the main build for this category
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            hx-on:click="document.getElementById('modal-container').innerHTML=''">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span th:text="${isEdit} ? 'Update Build' : 'Create Build'">Create Build</span>
+                        <span class="htmx-indicator" style="margin-left: 0.5rem; display: none;">...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</html>

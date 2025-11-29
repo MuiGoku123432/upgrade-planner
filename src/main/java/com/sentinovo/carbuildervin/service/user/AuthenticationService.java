@@ -215,4 +215,9 @@ public class AuthenticationService {
                 .tokenType("Bearer")
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public boolean isUsernameAvailable(String username) {
+        return userService.isUsernameAvailable(username);
+    }
 }

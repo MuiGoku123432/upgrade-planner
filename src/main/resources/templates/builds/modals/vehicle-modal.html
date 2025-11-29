@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Vehicle Modal -->
+<div class="modal" style="display: block;"
+     hx-on:click="if(event.target===this) document.getElementById('modal-container').innerHTML=''">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 th:text="${isEdit} ? 'Edit Vehicle' : 'Add Vehicle'">Add Vehicle</h4>
+                <button type="button" class="modal-close"
+                        hx-on:click="document.getElementById('modal-container').innerHTML=''">&times;</button>
+            </div>
+            
+            <form th:attr="hx-put=${isEdit} ? @{/builds/vehicle/{id}(id=${vehicle.id})} : null,
+                         hx-post=${isEdit} ? null : '/builds/vehicle'"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML"
+                  autocomplete="off"
+                  th:object="${vehicle}">
+
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="modal-body">
+                    <!-- Error Messages -->
+                    <div th:if="${error}" class="alert alert-error" style="color: #ff4444; margin-bottom: 1rem;">
+                        <span th:text="${error}">Error message</span>
+                    </div>
+                    
+                    <!-- VIN Field -->
+                    <div class="form-group">
+                        <label for="vin">VIN (Optional)</label>
+                        <input type="text"
+                               id="vin"
+                               name="vin"
+                               th:field="*{vin}"
+                               placeholder="Enter 17-character VIN"
+                               maxlength="17"
+                               hx-post="/vin/decode"
+                               hx-trigger="blur delay:500ms"
+                               hx-target="#vehicle-details"
+                               hx-include="[name='_csrf']"
+                               hx-indicator="#vin-loading"
+                               autocomplete="off">
+                        <small th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}" style="color: #ff4444; display: block;"></small>
+                        <small class="form-text">
+                            Leave blank for project vehicles. VIN will auto-populate vehicle details.
+                        </small>
+                        <div id="vin-loading" class="loading-indicator" style="display: none;">
+                            Decoding VIN...
+                        </div>
+                    </div>
+                    
+                    <!-- Vehicle Details -->
+                    <div id="vehicle-details">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="year">Year</label>
+                                <input type="number"
+                                       id="year"
+                                       name="year"
+                                       th:field="*{year}"
+                                       min="1886"
+                                       max="2030"
+                                       placeholder="e.g., 2021">
+                                <small th:if="${#fields.hasErrors('year')}" th:errors="*{year}" style="color: #ff4444; display: block;"></small>
+                            </div>
+                            <div class="form-group">
+                                <label for="make">Make</label>
+                                <input type="text"
+                                       id="make"
+                                       name="make"
+                                       th:field="*{make}"
+                                       placeholder="e.g., Toyota"
+                                       maxlength="100">
+                                <small th:if="${#fields.hasErrors('make')}" th:errors="*{make}" style="color: #ff4444; display: block;"></small>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="model">Model</label>
+                                <input type="text"
+                                       id="model"
+                                       name="model"
+                                       th:field="*{model}"
+                                       placeholder="e.g., 4Runner"
+                                       maxlength="100">
+                                <small th:if="${#fields.hasErrors('model')}" th:errors="*{model}" style="color: #ff4444; display: block;"></small>
+                            </div>
+                            <div class="form-group">
+                                <label for="trim">Trim</label>
+                                <input type="text"
+                                       id="trim"
+                                       name="trim"
+                                       th:field="*{trim}"
+                                       placeholder="e.g., TRD Off Road"
+                                       maxlength="100">
+                                <small th:if="${#fields.hasErrors('trim')}" th:errors="*{trim}" style="color: #ff4444; display: block;"></small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nickname">Nickname <span class="required">*</span></label>
+                            <input type="text"
+                                   id="nickname"
+                                   name="nickname"
+                                   th:field="*{nickname}"
+                                   placeholder="e.g., Trail Rig, Daily Driver"
+                                   maxlength="100"
+                                   required>
+                            <small th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}" style="color: #ff4444; display: block;"></small>
+                            <small class="form-text">
+                                A friendly name to identify this vehicle
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Notes</label>
+                            <textarea id="notes"
+                                      name="notes"
+                                      rows="3"
+                                      th:field="*{notes}"
+                                      placeholder="Additional notes about this vehicle..."
+                                      maxlength="1000"></textarea>
+                            <small th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}" style="color: #ff4444; display: block;"></small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            hx-on:click="document.getElementById('modal-container').innerHTML=''">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span th:text="${isEdit} ? 'Update Vehicle' : 'Add Vehicle'">Add Vehicle</span>
+                        <span class="htmx-indicator" style="margin-left: 0.5rem; display: none;">...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</html>

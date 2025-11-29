@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Part Modal -->
+<div class="modal" style="display: block;"
+     hx-on:click="if(event.target===this) document.getElementById('modal-container').innerHTML=''">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4 th:text="${isEdit} ? 'Edit Part' : 'Add Part'">Add Part</h4>
+                </div>
+                <button type="button" class="modal-close"
+                        hx-on:click="document.getElementById('modal-container').innerHTML=''">&times;</button>
+            </div>
+
+            <form th:attr="hx-put=${isEdit} ? @{/builds/part/{id}(id=${partId})} : null,
+                         hx-post=${isEdit} ? null : '/builds/part'"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML">
+
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <!-- Hidden build ID -->
+                <input type="hidden" name="buildId" th:value="${buildId}">
+
+                <div class="modal-body">
+                    <!-- Error Messages -->
+                    <div th:if="${error}" class="alert alert-error" style="color: #ff4444; margin-bottom: 1rem;">
+                        <span th:text="${error}">Error message</span>
+                    </div>
+
+                    <!-- Part Name -->
+                    <div class="form-group">
+                        <label for="name">Part Name <span class="required">*</span></label>
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               th:value="${part.name}"
+                               placeholder="e.g., Fox 2.5 Coilover, Bilstein 5100"
+                               maxlength="200"
+                               required>
+                    </div>
+
+                    <!-- Category and Tier Row -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoryCode">Category <span class="required">*</span></label>
+                            <select id="categoryCode"
+                                    name="categoryCode"
+                                    required>
+                                <option value="">Select category...</option>
+                                <option th:each="category : ${partCategories}"
+                                        th:value="${category.code}"
+                                        th:text="${category.label}"
+                                        th:selected="${part.categoryCode == category.code}">
+                                    Category
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tierCode">Quality Tier</label>
+                            <select id="tierCode"
+                                    name="tierCode">
+                                <option value="">Select tier...</option>
+                                <option th:each="tier : ${partTiers}"
+                                        th:value="${tier.code}"
+                                        th:text="${tier.label}"
+                                        th:selected="${part.tierCode == tier.code}">
+                                    Tier
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Brand and Part Number Row -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="brand">Brand</label>
+                            <input type="text"
+                                   id="brand"
+                                   name="brand"
+                                   th:value="${part.brand}"
+                                   placeholder="e.g., Fox, Bilstein, King"
+                                   maxlength="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="partNumber">Part Number</label>
+                            <input type="text"
+                                   id="partNumber"
+                                   name="partNumber"
+                                   th:value="${part.partNumber}"
+                                   placeholder="e.g., FOX-25-CO-001"
+                                   maxlength="100">
+                        </div>
+                    </div>
+
+                    <!-- Price, Quantity, Priority Row -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Price ($)</label>
+                            <input type="number"
+                                   id="price"
+                                   name="price"
+                                   th:value="${part.price}"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number"
+                                   id="quantity"
+                                   name="quantity"
+                                   th:value="${part.quantity ?: 1}"
+                                   min="1"
+                                   value="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="priorityValue">Priority</label>
+                            <input type="number"
+                                   id="priorityValue"
+                                   name="priorityValue"
+                                   th:value="${part.priorityValue}"
+                                   placeholder="1-1000"
+                                   min="1"
+                                   max="1000">
+                            <small class="form-text">Lower = higher priority</small>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="PLANNED" th:selected="${part.status == null || part.status == 'PLANNED'}">Planned</option>
+                            <option value="ORDERED" th:selected="${part.status == 'ORDERED'}">Ordered</option>
+                            <option value="SHIPPED" th:selected="${part.status == 'SHIPPED'}">Shipped</option>
+                            <option value="DELIVERED" th:selected="${part.status == 'DELIVERED'}">Delivered</option>
+                            <option value="INSTALLED" th:selected="${part.status == 'INSTALLED'}">Installed</option>
+                        </select>
+                    </div>
+
+                    <!-- Product URL -->
+                    <div class="form-group">
+                        <label for="productUrl">Product URL</label>
+                        <input type="url"
+                               id="productUrl"
+                               name="productUrl"
+                               th:value="${part.productUrl}"
+                               placeholder="https://..."
+                               maxlength="500">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description"
+                                  name="description"
+                                  rows="2"
+                                  th:text="${part.description}"
+                                  placeholder="Part description..."
+                                  maxlength="1000"></textarea>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes"
+                                  name="notes"
+                                  rows="2"
+                                  th:text="${part.notes}"
+                                  placeholder="Additional notes..."
+                                  maxlength="1000"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            hx-on:click="document.getElementById('modal-container').innerHTML=''">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span th:text="${isEdit} ? 'Update Part' : 'Add Part'">Add Part</span>
+                        <span class="htmx-indicator" style="margin-left: 0.5rem; display: none;">...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</html>

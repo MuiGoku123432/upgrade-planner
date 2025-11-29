@@ -196,10 +196,12 @@ public class VehicleService {
         User owner = authenticationService.getCurrentUserOrThrow();
         
         String vin = createDto.getVin();
-        if (vin != null) {
+        if (vin != null && !vin.trim().isEmpty()) {
             validateVin(vin);
             vin = vin.trim().toUpperCase();
             validateVinUniqueness(vin);
+        } else {
+            vin = null;
         }
         
         Vehicle vehicle = vehicleMapper.toEntity(createDto);

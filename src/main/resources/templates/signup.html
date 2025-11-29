@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Car Builder VIN</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <link rel="stylesheet" th:href="@{/css/jarvis-theme.css}">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar" class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Car Builder VIN</a>
+            <div class="navbar-nav">
+                <a href="/">Home</a>
+                <a href="/builds">Builds</a>
+            </div>
+            <div class="navbar-user">
+                <div class="guest-section">
+                    <a href="/login" class="nav-btn nav-btn-secondary">Login</a>
+                    <a href="/signup" class="nav-btn nav-btn-primary">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="container">
+        <div id="main-content">
+            <div class="jarvis-card" style="max-width: 400px; margin: 2rem auto;">
+                <h2>Sign Up</h2>
+                
+                <!-- Error Messages -->
+                <div th:if="${error}" class="alert" role="alert" style="color: #ff4444; margin-bottom: 1rem;">
+                    <span th:text="${error}">Error message</span>
+                </div>
+                
+                <!-- Success Messages -->
+                <div th:if="${message}" class="alert" role="alert" style="color: #00ff88; margin-bottom: 1rem;">
+                    <span th:text="${message}">Success message</span>
+                </div>
+                
+                <!-- Signup Form -->
+                <form th:action="@{/signup}" method="post">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="username">Username</label>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               th:value="${registerRequest?.username}"
+                               required 
+                               minlength="3" 
+                               pattern="[a-zA-Z0-9._-]+"
+                               autocomplete="username">
+                        <div id="username-feedback"></div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label for="email">Email</label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               th:value="${registerRequest?.email}"
+                               required 
+                               autocomplete="email">
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label for="password">Password</label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               minlength="8"
+                               autocomplete="new-password">
+                        <div id="password-feedback"></div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" 
+                               id="confirmPassword" 
+                               name="confirmPassword" 
+                               required 
+                               autocomplete="new-password">
+                    </div>
+                    
+                    <button type="submit" class="nav-btn nav-btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                        Sign Up
+                    </button>
+                </form>
+                
+                <p style="text-align: center; margin-top: 1rem;">
+                    Already have an account? 
+                    <a href="/login" class="text-jarvis">Login</a>
+                </p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

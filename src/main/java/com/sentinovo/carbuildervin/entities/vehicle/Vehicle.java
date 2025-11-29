@@ -25,7 +25,7 @@ public class Vehicle extends BaseEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @Pattern(regexp = "^[A-HJ-NPR-Z0-9]{17}$", message = "VIN must be 17 characters and contain valid characters")
+    @Pattern(regexp = "^$|^[A-HJ-NPR-Z0-9]{17}$", message = "VIN must be 17 characters and contain valid characters")
     @Column(name = "vin", length = 17, unique = true)
     private String vin;
 
