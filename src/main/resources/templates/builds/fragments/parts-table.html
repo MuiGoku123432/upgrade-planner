@@ -46,7 +46,7 @@
                             <td>
                                 <span th:if="${part.categoryName}"
                                       th:text="${part.categoryName}"
-                                      class="category-badge">Category</span>
+                                      class="badge badge--primary">Category</span>
                                 <span th:unless="${part.categoryName}">-</span>
                             </td>
                             <td>
@@ -70,7 +70,7 @@
                             </td>
                             <td>
                                 <span th:text="'P' + ${part.priorityValue ?: 99}"
-                                      class="priority-badge">P1</span>
+                                      class="badge badge--primary">P1</span>
                             </td>
                             <td>
                                 <div class="action-buttons">

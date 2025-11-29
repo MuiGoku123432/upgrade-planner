@@ -23,10 +23,9 @@
                         <span class="build-meta">
                             <span th:if="${build.upgradeCategoryName}"
                                   th:text="${build.upgradeCategoryName}"
-                                  class="category-badge">Category</span>
+                                  class="badge badge--primary">Category</span>
                             <span th:text="${build.status}"
-                                  th:classappend="'status-' + ${#strings.toLowerCase(build.status)}"
-                                  class="status-badge">Status</span>
+                                  th:class="${build.status == 'PLANNED' ? 'badge badge--secondary' : (build.status == 'IN_PROGRESS' ? 'badge badge--warning' : 'badge badge--success')}">Status</span>
                         </span>
                         <span class="build-actions" onclick="event.stopPropagation();">
                             <button class="outline secondary small"
