@@ -40,13 +40,13 @@ public class VinDecodingService {
         validateVin(vin);
         
         try {
-            String url = marketCheckBaseUrl + VIN_DECODE_ENDPOINT.replace("{vin}", vin);
+            // MarketCheck API uses api_key query parameter for authentication
+            String url = marketCheckBaseUrl + VIN_DECODE_ENDPOINT.replace("{vin}", vin) + "?api_key=" + marketCheckApiKey;
 
             @SuppressWarnings("unchecked")
             Mono<Map> responseMono = vinDecoderWebClient
                 .get()
                 .uri(url)
-                .header("Authorization", "Bearer " + marketCheckApiKey)
                 .retrieve()
                 .bodyToMono(Map.class);
 
@@ -123,24 +123,18 @@ public class VinDecodingService {
     }
 
 
-    @SuppressWarnings("unchecked")
     private VinDecodingResponse parseResponse(Map<String, Object> responseBody, String vin) {
         try {
-            // Extract vehicle data from MarketCheck response structure
-            Map<String, Object> vehicle = (Map<String, Object>) responseBody.get("vehicle");
-            if (vehicle == null) {
-                throw new ExternalServiceException("MarketCheck", 200, "Invalid response structure - missing vehicle data");
-            }
-
-            String make = extractStringValue(vehicle, "make");
-            String model = extractStringValue(vehicle, "model");
-            Integer year = extractIntegerValue(vehicle, "year");
-            String trim = extractStringValue(vehicle, "trim");
-            String bodyType = extractStringValue(vehicle, "body_type");
-            String engine = extractStringValue(vehicle, "engine");
-            String transmission = extractStringValue(vehicle, "transmission");
-            String drivetrain = extractStringValue(vehicle, "drivetrain");
-            String fuelType = extractStringValue(vehicle, "fuel_type");
+            // MarketCheck Basic VIN Decoder returns data at root level
+            String make = extractStringValue(responseBody, "make");
+            String model = extractStringValue(responseBody, "model");
+            Integer year = extractIntegerValue(responseBody, "year");
+            String trim = extractStringValue(responseBody, "trim");
+            String bodyType = extractStringValue(responseBody, "body_type");
+            String engine = extractStringValue(responseBody, "engine");
+            String transmission = extractStringValue(responseBody, "transmission");
+            String drivetrain = extractStringValue(responseBody, "drivetrain");
+            String fuelType = extractStringValue(responseBody, "fuel_type");
 
             return VinDecodingResponse.builder()
                     .vin(vin)

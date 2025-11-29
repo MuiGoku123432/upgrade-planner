@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .requestMatchers("/fragments/nav").permitAll()
                 
                 // Protected pages
-                .requestMatchers("/vehicles/**", "/builds/**", "/parts/**").authenticated()
+                .requestMatchers("/vehicles/**", "/builds/**", "/parts/**", "/vin/**").authenticated()
                 .requestMatchers("/api/v1/**").authenticated()
                 
                 .anyRequest().authenticated()
