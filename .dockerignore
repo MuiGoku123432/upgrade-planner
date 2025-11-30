@@ -1,0 +1,52 @@
+# Build artifacts
+target/
+*.jar
+*.war
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Node modules (if any frontend tooling)
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose*.yml
+compose.yaml
+.dockerignore
+
+# Environment files (don't include secrets in image)
+.env
+.env.*
+*.env
+
+# Test files
+src/test/
+
+# Maven wrapper (we copy this explicitly)
+# .mvn/
+
+# Misc
+*.bak
+*.tmp
