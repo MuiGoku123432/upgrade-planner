@@ -1,0 +1,39 @@
+# ================================
+# Production Docker Compose
+# ================================
+# Uses Neon PostgreSQL (no local database)
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in your Neon credentials
+#   2. Run: docker compose -f compose.prod.yaml up -d
+#
+# To rebuild after code changes:
+#   docker compose -f compose.prod.yaml up -d --build
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: car-builder-vin
+    ports:
+      - "8529:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=neon
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - MARKETCHECK_API_KEY=${MARKETCHECK_API_KEY}
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
