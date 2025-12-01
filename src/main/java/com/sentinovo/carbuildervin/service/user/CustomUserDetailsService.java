@@ -10,7 +10,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,28 +41,43 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new CustomUserPrincipal(user);
     }
 
-    public static class CustomUserPrincipal implements UserDetails {
-        private final User user;
+    public static class CustomUserPrincipal implements UserDetails, Serializable {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private final UUID userId;
+        private final String username;
+        private final String email;
+        private final String passwordHash;
+        private final boolean isActive;
+        private final Set<String> roles;
 
         public CustomUserPrincipal(User user) {
-            this.user = user;
+            this.userId = user.getId();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.passwordHash = user.getPasswordHash();
+            this.isActive = user.getIsActive();
+            this.roles = user.getRoles().stream()
+                    .map(role -> role.getName())
+                    .collect(Collectors.toSet());
         }
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return user.getRoles().stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+            return roles.stream()
+                    .map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
                     .collect(Collectors.toList());
         }
 
         @Override
         public String getPassword() {
-            return user.getPasswordHash();
+            return passwordHash;
         }
 
         @Override
         public String getUsername() {
-            return user.getUsername();
+            return username;
         }
 
         @Override
@@ -68,7 +87,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         @Override
         public boolean isAccountNonLocked() {
-            return user.getIsActive();
+            return isActive;
         }
 
         @Override
@@ -78,11 +97,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         @Override
         public boolean isEnabled() {
-            return user.getIsActive();
+            return isActive;
         }
 
-        public User getUser() {
-            return user;
+        public UUID getUserId() {
+            return userId;
+        }
+
+        public String getEmail() {
+            return email;
         }
     }
 }
