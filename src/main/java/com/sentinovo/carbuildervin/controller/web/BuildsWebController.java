@@ -189,8 +189,8 @@ public class BuildsWebController {
             // If HTMX request, trigger refresh of build section
             if (isHtmxRequest(request)) {
                 response.setHeader("HX-Trigger", "buildCreated");
-                // Return empty to close modal - client listens for buildCreated event
-                return "";
+                // Return null to signal response is handled - closes modal via HTMX event
+                return null;
             }
 
             return "redirect:/builds?vehicleId=" + vehicleId + "&buildId=" + createdBuild.getId();
@@ -248,8 +248,8 @@ public class BuildsWebController {
             // If HTMX request, trigger refresh of parts table
             if (isHtmxRequest(request)) {
                 response.setHeader("HX-Trigger", "partCreated");
-                // Return empty to close modal - client listens for partCreated event
-                return "";
+                // Return null to signal response is handled - closes modal via HTMX event
+                return null;
             }
 
             return "redirect:/builds";
@@ -299,8 +299,8 @@ public class BuildsWebController {
             // If HTMX request, trigger vehicleCreated event
             if (isHtmxRequest(request)) {
                 response.setHeader("HX-Trigger", "vehicleCreated");
-                // Return empty to close modal - client listens for vehicleCreated event
-                return "";
+                // Return null to signal response is handled - closes modal via HTMX event
+                return null;
             }
 
             return "redirect:/builds?vehicleId=" + createdVehicle.getId();
@@ -343,8 +343,8 @@ public class BuildsWebController {
             // If HTMX request, trigger vehicleUpdated event
             if (isHtmxRequest(request)) {
                 response.setHeader("HX-Trigger", "vehicleUpdated");
-                // Return empty to close modal - client listens for vehicleUpdated event
-                return "";
+                // Return null to signal response is handled - closes modal via HTMX event
+                return null;
             }
 
             return "redirect:/builds";
@@ -421,8 +421,8 @@ public class BuildsWebController {
 
             if (isHtmxRequest(request)) {
                 response.setHeader("HX-Trigger", "buildUpdated");
-                // Return empty to close modal - HTMX will swap empty content
-                return "";
+                // Return null to signal response is handled - closes modal via HTMX event
+                return null;
             }
 
             return "redirect:/builds";
@@ -520,8 +520,8 @@ public class BuildsWebController {
 
             if (isHtmxRequest(request)) {
                 response.setHeader("HX-Trigger", "partUpdated");
-                // Return empty to close modal - HTMX will swap empty content
-                return "";
+                // Return null to signal response is handled - closes modal via HTMX event
+                return null;
             }
 
             return "redirect:/builds";
