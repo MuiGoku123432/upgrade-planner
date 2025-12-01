@@ -10,6 +10,15 @@ FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /app
 
+# Sentry build-time configuration (from docker build args)
+ARG SENTRY_AUTH_TOKEN
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+ENV SENTRY_ORG=${SENTRY_ORG}
+ENV SENTRY_PROJECT=${SENTRY_PROJECT}
+
 # Copy Maven wrapper and pom.xml first (better layer caching)
 COPY pom.xml mvnw ./
 COPY .mvn .mvn

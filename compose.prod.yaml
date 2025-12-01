@@ -15,6 +15,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Build-time Sentry config (for source bundle upload)
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN}
+        SENTRY_ORG: sentinovo
+        SENTRY_PROJECT: java-spring-boot
     container_name: car-builder-vin
     ports:
       - "8529:8080"
@@ -25,6 +30,9 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - MARKETCHECK_API_KEY=${MARKETCHECK_API_KEY}
       - JAVA_OPTS=${JAVA_OPTS:--Xmx512m}
+      # Runtime Sentry config
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_ENVIRONMENT=production
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
