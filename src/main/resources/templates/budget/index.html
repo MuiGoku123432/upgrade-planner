@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status & Progress - Car Builder VIN</title>
+    <title>Budget Overview - Car Builder VIN</title>
 
     <!-- CSS -->
     <link rel="stylesheet" th:href="@{/css/pico.min.css}">
@@ -23,8 +23,8 @@
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/builds">Builds</a></li>
-            <li><a href="/status" class="contrast">Status</a></li>
-            <li><a href="/budget">Budget</a></li>
+            <li><a href="/status">Status</a></li>
+            <li><a href="/budget" class="contrast">Budget</a></li>
             <li sec:authorize="isAuthenticated()">
                 <span sec:authentication="name">User</span>
             </li>
@@ -48,15 +48,15 @@
         <!-- Page Header -->
         <header>
             <hgroup>
-                <h1>Status & Progress</h1>
-                <p>Track your build progress across all vehicles</p>
+                <h1>Budget Overview</h1>
+                <p>Track costs across all your builds</p>
             </hgroup>
         </header>
 
         <!-- Filter Form -->
-        <form id="status-filters"
-              hx-get="/status/fragment/overview"
-              hx-target="#status-results"
+        <form id="budget-filters"
+              hx-get="/budget/fragment/overview"
+              hx-target="#budget-results"
               hx-trigger="change delay:300ms"
               hx-push-url="false"
               class="status-filters">
@@ -99,12 +99,12 @@
             </div>
         </form>
 
-        <!-- Status Results -->
-        <section id="status-results"
-                 hx-get="/status/fragment/overview"
+        <!-- Budget Results -->
+        <section id="budget-results"
+                 hx-get="/budget/fragment/overview"
                  hx-trigger="load"
                  hx-swap="innerHTML">
-            <article aria-busy="true">Loading build status...</article>
+            <article aria-busy="true">Loading budget data...</article>
         </section>
     </main>
 
