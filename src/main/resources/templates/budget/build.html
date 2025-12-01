@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Budget - ' + ${build.name}">Budget - Build</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+    <link rel="stylesheet" th:href="@{/css/status.css}">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <style>
+        .budget-filters fieldset {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .budget-filters fieldset label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .budget-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--pico-primary);
+        }
+        .sub-part-row {
+            opacity: 0.85;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .indent {
+            padding-left: 1rem;
+            color: var(--pico-muted-color);
+        }
+        .badge {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge.required {
+            background-color: var(--pico-primary-background);
+            color: var(--pico-primary-inverse);
+        }
+        .badge.optional {
+            background-color: var(--pico-secondary-background);
+            color: var(--pico-secondary-inverse);
+        }
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        table {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" class="contrast"><strong>Car Builder VIN</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/builds">Builds</a></li>
+            <li><a href="/status">Status</a></li>
+            <li><a href="/budget" class="contrast">Budget</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span sec:authentication="name">User</span>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="outline contrast">Logout</button>
+                </form>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/login" role="button" class="outline">Login</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/signup" role="button">Sign Up</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="jarvis-theme container">
+        <!-- Page Header -->
+        <header>
+            <a href="/budget">&larr; Back to Budget Overview</a>
+            <hgroup>
+                <h1>Budget - <span th:text="${build.name}">Build Name</span></h1>
+                <p th:text="${vehicleLabel}">Vehicle</p>
+            </hgroup>
+        </header>
+
+        <!-- Filter Form -->
+        <form id="budget-filters"
+              th:hx-get="@{/budget/build/{id}/fragment/results(id=${build.id})}"
+              hx-target="#budget-results"
+              hx-trigger="change delay:300ms"
+              hx-push-url="false"
+              class="budget-filters">
+
+            <!-- Required/Optional Checkboxes -->
+            <fieldset>
+                <label>
+                    <input type="checkbox" name="includeRequired" value="true" checked>
+                    Include Required
+                </label>
+                <label>
+                    <input type="checkbox" name="includeOptional" value="true" checked>
+                    Include Optional
+                </label>
+            </fieldset>
+
+            <div class="grid">
+                <!-- Category multi-select -->
+                <label>
+                    Categories (leave empty for all)
+                    <select name="categoryCodes" multiple size="4">
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.code}"
+                                th:text="${cat.label}">Category</option>
+                    </select>
+                </label>
+
+                <!-- Tier multi-select -->
+                <label>
+                    Tiers (leave empty for all)
+                    <select name="tierCodes" multiple size="4">
+                        <option th:each="tier : ${tiers}"
+                                th:value="${tier.code}"
+                                th:text="${tier.label}">Tier</option>
+                    </select>
+                </label>
+
+                <!-- Status multi-select -->
+                <label>
+                    Status (leave empty for all)
+                    <select name="statuses" multiple size="4">
+                        <option th:each="status : ${statuses}"
+                                th:value="${status}"
+                                th:text="${status}">Status</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="grid">
+                <!-- Priority range -->
+                <label>
+                    Min Priority
+                    <input type="number" name="minPriority" min="1" max="10" placeholder="1">
+                </label>
+                <label>
+                    Max Priority
+                    <input type="number" name="maxPriority" min="1" max="10" placeholder="10">
+                </label>
+
+                <!-- Date range -->
+                <label>
+                    Start Date
+                    <input type="date" name="startDate">
+                </label>
+                <label>
+                    End Date
+                    <input type="date" name="endDate">
+                </label>
+            </div>
+        </form>
+
+        <!-- Budget Results (loads via HTMX) -->
+        <section id="budget-results"
+                 th:hx-get="@{/budget/build/{id}/fragment/results(id=${build.id})}"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+            <article aria-busy="true">Calculating budget...</article>
+        </section>
+    </main>
+
+    <!-- Global CSRF Token for HTMX requests -->
+    <input type="hidden" id="csrf-token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</body>
+</html>

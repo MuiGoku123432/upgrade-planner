@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Build Summary Fragment - Summary Chips -->
+<th:block th:fragment="build-summary">
+    <div class="summary-grid">
+        <!-- Total Parts -->
+        <article class="summary-chip">
+            <div class="chip-value" th:text="${detail.totalPartsCount}">0</div>
+            <div class="chip-label">Total Parts</div>
+        </article>
+
+        <!-- Required Installed -->
+        <article class="summary-chip">
+            <div class="chip-value">
+                <span th:text="${detail.requiredPartsInstalled}">0</span>
+                <span class="chip-secondary" th:text="${'/ ' + detail.requiredPartsTotal}">/ 0</span>
+            </div>
+            <div class="chip-label">Required Installed</div>
+            <div class="chip-progress">
+                <progress th:value="${detail.percentRequiredInstalled}" max="100"
+                          th:classappend="${detail.percentRequiredInstalled == 100 ? 'progress-complete' : ''}">
+                </progress>
+                <small th:text="${detail.percentRequiredInstalled + '%'}">0%</small>
+            </div>
+        </article>
+
+        <!-- Optional Installed -->
+        <article class="summary-chip">
+            <div class="chip-value">
+                <span th:text="${detail.optionalPartsInstalled}">0</span>
+                <span class="chip-secondary" th:text="${'/ ' + detail.optionalPartsTotal}">/ 0</span>
+            </div>
+            <div class="chip-label">Optional Installed</div>
+            <div class="chip-progress">
+                <progress th:value="${detail.percentOptionalInstalled}" max="100" class="progress-optional">
+                </progress>
+                <small th:text="${detail.percentOptionalInstalled + '%'}">0%</small>
+            </div>
+        </article>
+
+        <!-- Overdue Count -->
+        <article class="summary-chip" th:classappend="${detail.overdueRequiredCount > 0 ? 'chip-warning' : ''}">
+            <div class="chip-value" th:classappend="${detail.overdueRequiredCount > 0 ? 'text-warning' : ''}"
+                 th:text="${detail.overdueRequiredCount}">0</div>
+            <div class="chip-label">Overdue Parts</div>
+        </article>
+    </div>
+</th:block>
+</body>
+</html>

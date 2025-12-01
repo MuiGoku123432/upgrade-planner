@@ -57,6 +57,7 @@
                             </td>
                             <td>
                                 <select th:id="'status-' + ${part.id}"
+                                        name="status"
                                         th:hx-patch="@{/parts/{id}/status(id=${part.id})}"
                                         hx-target="closest tr"
                                         hx-swap="outerHTML"

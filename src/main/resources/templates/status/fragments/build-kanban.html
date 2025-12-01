@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Build Kanban Fragment - Parts organized by status columns -->
+<th:block th:fragment="build-kanban">
+    <div class="kanban-board">
+        <!-- Column for each status -->
+        <th:block th:each="status : ${statusOrder}">
+            <th:block th:with="parts=${detail.partsByStatus.get(status)}">
+                <!-- Only show columns that have parts or are key statuses -->
+                <div th:if="${status == 'PLANNED' or status == 'ORDERED' or status == 'INSTALLED' or (parts != null and not #lists.isEmpty(parts))}"
+                     class="kanban-column"
+                     th:classappend="${status == 'INSTALLED' ? 'column-complete' : (status == 'CANCELLED' ? 'column-cancelled' : '')}">
+
+                    <!-- Column Header -->
+                    <div class="kanban-header">
+                        <h3 th:text="${status}">Status</h3>
+                        <span class="count-badge"
+                              th:text="${parts != null ? #lists.size(parts) : 0}">0</span>
+                    </div>
+
+                    <!-- Column Content -->
+                    <div class="kanban-cards">
+                        <th:block th:if="${parts != null and not #lists.isEmpty(parts)}">
+                            <div th:each="part : ${parts}" class="kanban-card"
+                                 th:classappend="${part.isRequired == true ? 'card-required' : 'card-optional'}">
+                                <!-- Part Header -->
+                                <div class="card-header">
+                                    <a th:if="${part.productUrl}"
+                                       th:href="${part.productUrl}"
+                                       th:text="${part.name}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="part-link"><strong>Part Name</strong></a>
+                                    <strong th:unless="${part.productUrl}" th:text="${part.name}">Part Name</strong>
+                                    <span th:if="${part.isRequired == true}" class="badge badge--primary" title="Required">REQ</span>
+                                </div>
+
+                                <!-- Part Details -->
+                                <div class="card-details">
+                                    <small th:if="${part.brand}" th:text="${part.brand}" class="text-muted">Brand</small>
+                                    <small th:if="${part.categoryName}">
+                                        <span class="badge badge--muted" th:text="${part.categoryName}">Category</span>
+                                    </small>
+                                </div>
+
+                                <!-- Price & Priority -->
+                                <div class="card-meta">
+                                    <span th:if="${part.price}" class="price"
+                                          th:text="'$' + ${#numbers.formatDecimal(part.price, 1, 2)}">$0.00</span>
+                                    <span th:if="${part.priorityValue}" class="priority"
+                                          th:text="'P' + ${part.priorityValue}">P1</span>
+                                </div>
+
+                                <!-- Overdue Warning -->
+                                <div th:if="${part.targetPurchaseDate != null and
+                                             part.targetPurchaseDate.isBefore(T(java.time.LocalDate).now()) and
+                                             part.status != 'INSTALLED'}"
+                                     class="card-warning">
+                                    <small class="text-warning">
+                                        Overdue: <span th:text="${#temporals.format(part.targetPurchaseDate, 'MMM d')}">Jan 1</span>
+                                    </small>
+                                </div>
+
+                                <!-- Status Dropdown -->
+                                <div class="card-actions">
+                                    <select th:id="'kanban-status-' + ${part.id}"
+                                            name="status"
+                                            th:hx-patch="@{/parts/{id}/status(id=${part.id})}"
+                                            hx-include="#csrf-token"
+                                            hx-swap="none"
+                                            hx-on::after-request="htmx.trigger(document.body, 'partUpdated')"
+                                            class="status-select">
+                                        <option value="PLANNED" th:selected="${part.status == 'PLANNED'}">Planned</option>
+                                        <option value="RESEARCHING" th:selected="${part.status == 'RESEARCHING'}">Researching</option>
+                                        <option value="ORDERED" th:selected="${part.status == 'ORDERED'}">Ordered</option>
+                                        <option value="DELIVERED" th:selected="${part.status == 'DELIVERED'}">Delivered</option>
+                                        <option value="INSTALLED" th:selected="${part.status == 'INSTALLED'}">Installed</option>
+                                        <option value="CANCELLED" th:selected="${part.status == 'CANCELLED'}">Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </th:block>
+
+                        <!-- Empty column state -->
+                        <div th:if="${parts == null or #lists.isEmpty(parts)}" class="kanban-empty">
+                            <small class="text-muted">No parts</small>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </th:block>
+    </div>
+
+    <!-- Legend -->
+    <div class="kanban-legend">
+        <span><span class="legend-dot legend-required"></span> Required</span>
+        <span><span class="legend-dot legend-optional"></span> Optional</span>
+    </div>
+</th:block>
+</body>
+</html>

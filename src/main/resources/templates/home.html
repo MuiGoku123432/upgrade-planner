@@ -13,54 +13,88 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
-<body hx-boost="true">
+<body>
     <!-- Navigation -->
-    <nav id="navbar" class="navbar">
-        <div class="navbar-container">
-            <a href="/" class="navbar-brand">Car Builder VIN</a>
-            <div class="navbar-nav">
-                <a href="/">Home</a>
-                <a href="/builds">Builds</a>
-            </div>
-            <div class="navbar-user">
-                <!-- Auth section rendered server-side -->
-                <div sec:authorize="isAuthenticated()" class="user-section">
-                    <span class="username" sec:authentication="name">User</span>
-                    <form hx-post="/logout" class="logout-form">
-                        <button type="submit" class="logout-btn">Logout</button>
-                    </form>
-                </div>
-                <div sec:authorize="!isAuthenticated()" class="guest-section">
-                    <a href="/login" class="nav-btn nav-btn-secondary">Login</a>
-                    <a href="/signup" class="nav-btn nav-btn-primary">Sign Up</a>
-                </div>
-            </div>
-        </div>
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" class="contrast"><strong>Car Builder VIN</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/" class="contrast">Home</a></li>
+            <li><a href="/builds">Builds</a></li>
+            <li><a href="/status">Status</a></li>
+            <li><a href="/budget">Budget</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span sec:authentication="name">User</span>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="outline contrast">Logout</button>
+                </form>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/login" role="button" class="outline">Login</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/signup" role="button">Sign Up</a>
+            </li>
+        </ul>
     </nav>
     
     <!-- Main Content -->
     <main class="jarvis-theme container">
         <div id="main-content">
-            <div class="jarvis-card" style="text-align: center; margin: 2rem auto; max-width: 600px;">
-                <h1>Home Page</h1>
-                <p class="text-muted">Welcome to the Car Builder VIN System</p>
-                
-                <!-- Success Messages -->
-                <div th:if="${message}" class="alert" role="alert" style="color: #00ff88; margin-bottom: 1rem;">
-                    <span th:text="${message}">Success message</span>
-                </div>
-                
+            <!-- Success Messages -->
+            <div th:if="${message}" class="alert" role="alert" style="color: #00ff88; margin-bottom: 1rem; text-align: center;">
+                <span th:text="${message}">Success message</span>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="jarvis-card" style="text-align: center; margin: 2rem auto; max-width: 800px;">
+                <h1>Car Builder VIN</h1>
+                <p class="text-muted" style="font-size: 1.2rem;">Plan, organize, and track your vehicle upgrade builds</p>
+
                 <div sec:authorize="isAuthenticated()" style="margin-top: 2rem;">
                     <p>Welcome back, <span sec:authentication="name" class="text-jarvis">User</span>!</p>
-                    <a href="/builds" class="nav-btn nav-btn-primary">View Your Builds</a>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="/builds" class="nav-btn nav-btn-primary">View Your Builds</a>
+                        <a href="/budget" class="nav-btn nav-btn-secondary">Track Budget</a>
+                        <a href="/status" class="nav-btn nav-btn-secondary">Check Status</a>
+                    </div>
                 </div>
-                
+
                 <div sec:authorize="!isAuthenticated()" style="margin-top: 2rem;">
                     <p>Get started by creating an account or logging in.</p>
                     <div style="display: flex; gap: 1rem; justify-content: center;">
                         <a href="/signup" class="nav-btn nav-btn-primary">Sign Up</a>
                         <a href="/login" class="nav-btn nav-btn-secondary">Login</a>
                     </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div style="margin: 3rem auto; max-width: 900px;">
+                <h2 style="text-align: center; margin-bottom: 2rem;">What You Can Do</h2>
+                <div class="grid">
+                    <article>
+                        <header><strong>Track Vehicles</strong></header>
+                        <p>Add vehicles by VIN for automatic decoding, or create project builds for future vehicles. Keep all your rides organized in one place.</p>
+                    </article>
+                    <article>
+                        <header><strong>Plan Upgrades</strong></header>
+                        <p>Create multiple builds per vehicle: Overlanding, Performance, Towing, Daily Driver. Compare different upgrade paths and scenarios.</p>
+                    </article>
+                </div>
+                <div class="grid">
+                    <article>
+                        <header><strong>Manage Parts</strong></header>
+                        <p>Organize parts by category and tier (Budget, Mid, Premium). Store product links, prices, and notes. Break down kits into sub-parts.</p>
+                    </article>
+                    <article>
+                        <header><strong>Track Budget</strong></header>
+                        <p>See total costs by build, category, or tier. Track required vs optional parts. Monitor installation progress across all your builds.</p>
+                    </article>
                 </div>
             </div>
         </div>

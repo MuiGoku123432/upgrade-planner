@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="line-items">
+    <div style="overflow-x: auto;">
+        <table class="line-items-table" th:if="${not #lists.isEmpty(lineItems)}">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Tier</th>
+                    <th>Required</th>
+                    <th>Priority</th>
+                    <th>Target Date</th>
+                    <th>Status</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${lineItems}"
+                    th:class="${item.type == 'SUB_PART' ? 'sub-part-row' : ''}">
+                    <td>
+                        <span th:if="${item.type == 'PART'}">Part</span>
+                        <span th:if="${item.type == 'SUB_PART'}" class="indent">&rarr; Sub-part</span>
+                    </td>
+                    <td th:text="${item.name}">Name</td>
+                    <td th:text="${item.brand != null ? item.brand : '-'}">Brand</td>
+                    <td th:text="${item.categoryLabel != null ? item.categoryLabel : '-'}">Category</td>
+                    <td th:text="${item.tierLabel != null ? item.tierLabel : '-'}">Tier</td>
+                    <td>
+                        <span th:if="${item.isRequired}" class="badge required">Yes</span>
+                        <span th:unless="${item.isRequired}" class="badge optional">No</span>
+                    </td>
+                    <td th:text="${item.priorityValue != null ? item.priorityValue : '-'}">5</td>
+                    <td th:text="${item.targetPurchaseDate != null ? item.targetPurchaseDate : '-'}">-</td>
+                    <td th:text="${item.status != null ? item.status : '-'}">PLANNED</td>
+                    <td th:text="${item.price != null ? '$' + #numbers.formatDecimal(item.price, 1, 'COMMA', 2, 'POINT') : '-'}">$0.00</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="9"><strong>Total</strong></td>
+                    <td>
+                        <strong th:text="${'$' + #numbers.formatDecimal(lineItems.![price != null ? price : T(java.math.BigDecimal).ZERO].stream().reduce(T(java.math.BigDecimal).ZERO, (a, b) -> a.add(b)), 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <p th:if="${#lists.isEmpty(lineItems)}">No items match the selected filters.</p>
+</th:block>
+</body>
+</html>
