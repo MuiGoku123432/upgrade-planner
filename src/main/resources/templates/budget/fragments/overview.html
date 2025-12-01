@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="overview">
+    <!-- Grand Total Summary -->
+    <div class="grid" th:if="${not #lists.isEmpty(budgetOverviews)}">
+        <article>
+            <header>All Builds Total</header>
+            <p class="budget-amount" style="font-size: 1.5rem; font-weight: bold; color: var(--pico-primary);">
+                <span th:text="${'$' + #numbers.formatDecimal(grandTotal, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+            </p>
+        </article>
+    </div>
+
+    <!-- Build Cards with Cost Info -->
+    <div th:each="overview : ${budgetOverviews}" style="margin-bottom: 1rem;">
+        <article class="budget-card">
+            <header style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <hgroup>
+                    <h3 th:text="${overview.buildName}">Build Name</h3>
+                    <p th:text="${overview.vehicleLabel}">Vehicle</p>
+                </hgroup>
+                <span class="badge" style="background-color: var(--pico-primary-background); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.8rem;" th:text="${overview.upgradeCategoryName}">Category</span>
+            </header>
+
+            <div class="budget-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0;">
+                <div>
+                    <strong>Total:</strong>
+                    <span th:text="${'$' + #numbers.formatDecimal(overview.totalCost != null ? overview.totalCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</span>
+                </div>
+                <div>
+                    <strong>Required:</strong>
+                    <span th:text="${'$' + #numbers.formatDecimal(overview.requiredCost != null ? overview.requiredCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</span>
+                    (<span th:text="${overview.requiredItemsCount}">0</span> items)
+                </div>
+                <div>
+                    <strong>Optional:</strong>
+                    <span th:text="${'$' + #numbers.formatDecimal(overview.optionalCost != null ? overview.optionalCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</span>
+                    (<span th:text="${overview.optionalItemsCount}">0</span> items)
+                </div>
+            </div>
+
+            <footer style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1; margin-right: 1rem;">
+                    <progress th:value="${overview.percentRequiredInstalled}" max="100" style="width: 100%;"></progress>
+                    <small th:text="${overview.percentRequiredInstalled + '% installed'}">0% installed</small>
+                </div>
+                <a th:href="@{/budget/build/{id}(id=${overview.buildId})}" role="button" class="outline">
+                    View Details
+                </a>
+            </footer>
+        </article>
+    </div>
+
+    <!-- Empty state -->
+    <article th:if="${#lists.isEmpty(budgetOverviews)}">
+        <p>No builds found matching the selected filters.</p>
+    </article>
+</th:block>
+</body>
+</html>

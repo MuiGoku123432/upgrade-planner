@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Overview Fragment - Build Status Cards -->
+<th:block th:fragment="overview">
+    <!-- Empty state -->
+    <article th:if="${#lists.isEmpty(buildOverviews)}" class="empty-state">
+        <header>
+            <h3>No Builds Found</h3>
+        </header>
+        <p>No builds match your current filters. Try adjusting your filters or <a href="/builds">create a new build</a>.</p>
+    </article>
+
+    <!-- Build cards grid -->
+    <div th:if="${not #lists.isEmpty(buildOverviews)}" class="status-grid">
+        <article th:each="overview : ${buildOverviews}" class="status-card">
+            <!-- Card Header -->
+            <header class="status-card-header">
+                <div class="status-card-title">
+                    <h4 th:text="${overview.buildName}">Build Name</h4>
+                    <small th:text="${overview.vehicleLabel}" class="text-muted">Vehicle</small>
+                </div>
+                <div class="status-card-badges">
+                    <span th:if="${overview.upgradeCategoryName}"
+                          class="badge badge--primary"
+                          th:text="${overview.upgradeCategoryName}">Category</span>
+                    <span class="badge"
+                          th:classappend="${overview.status == 'COMPLETED' ? 'badge--success' :
+                                          (overview.status == 'IN_PROGRESS' ? 'badge--warning' :
+                                          (overview.status == 'CANCELLED' ? 'badge--error' : 'badge--muted'))}"
+                          th:text="${overview.status}">Status</span>
+                </div>
+            </header>
+
+            <!-- Progress Section -->
+            <div class="status-progress">
+                <!-- Required Parts Progress -->
+                <div class="progress-row">
+                    <div class="progress-label">
+                        <span>Required Parts</span>
+                        <span th:text="${overview.requiredPartsInstalled + '/' + overview.requiredPartsTotal}">0/0</span>
+                    </div>
+                    <progress th:value="${overview.percentRequiredInstalled}" max="100"
+                              th:classappend="${overview.percentRequiredInstalled == 100 ? 'progress-complete' : ''}">
+                    </progress>
+                    <small class="progress-percent" th:text="${overview.percentRequiredInstalled + '%'}">0%</small>
+                </div>
+
+                <!-- Optional Parts Progress -->
+                <div class="progress-row" th:if="${overview.optionalPartsTotal > 0}">
+                    <div class="progress-label">
+                        <span>Optional Parts</span>
+                        <span th:text="${overview.optionalPartsInstalled + '/' + overview.optionalPartsTotal}">0/0</span>
+                    </div>
+                    <progress th:value="${overview.percentOptionalInstalled}" max="100" class="progress-optional">
+                    </progress>
+                    <small class="progress-percent" th:text="${overview.percentOptionalInstalled + '%'}">0%</small>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="status-stats">
+                <div class="stat" th:if="${overview.overdueRequiredCount > 0}">
+                    <span class="stat-value stat-warning" th:text="${overview.overdueRequiredCount}">0</span>
+                    <span class="stat-label">Overdue</span>
+                </div>
+                <div class="stat" th:if="${overview.priorityLevel != null}">
+                    <span class="stat-value" th:text="${'P' + overview.priorityLevel}">P1</span>
+                    <span class="stat-label">Priority</span>
+                </div>
+                <div class="stat" th:if="${overview.targetCompletionDate != null}">
+                    <span class="stat-value"
+                          th:text="${#temporals.format(overview.targetCompletionDate, 'MMM yyyy')}"
+                          th:classappend="${overview.targetCompletionDate.isBefore(T(java.time.LocalDate).now()) and overview.status != 'COMPLETED' ? 'stat-warning' : ''}">
+                        Dec 2025
+                    </span>
+                    <span class="stat-label">Target</span>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <footer>
+                <a th:href="@{/status/build/{id}(id=${overview.buildId})}" role="button" class="outline">
+                    View Details
+                </a>
+            </footer>
+        </article>
+    </div>
+</th:block>
+</body>
+</html>

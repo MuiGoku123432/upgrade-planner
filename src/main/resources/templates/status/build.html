@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${build.name + ' - Status - Car Builder VIN'}">Build Status - Car Builder VIN</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+    <link rel="stylesheet" th:href="@{/css/status.css}">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" class="contrast"><strong>Car Builder VIN</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/builds">Builds</a></li>
+            <li><a href="/status" class="contrast">Status</a></li>
+            <li><a href="/budget">Budget</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span sec:authentication="name">User</span>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="outline contrast">Logout</button>
+                </form>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/login" role="button" class="outline">Login</a>
+            </li>
+            <li sec:authorize="!isAuthenticated()">
+                <a href="/signup" role="button">Sign Up</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="jarvis-theme container">
+        <!-- Back Link & Header -->
+        <header class="build-header">
+            <a href="/status" class="back-link">← Back to Status</a>
+            <hgroup>
+                <h1 th:text="${build.name}">Build Name</h1>
+                <p>
+                    <span th:text="${vehicleLabel}">Vehicle</span>
+                    <span th:if="${build.upgradeCategoryName}" class="badge badge--primary" th:text="${build.upgradeCategoryName}">Category</span>
+                    <span class="badge"
+                          th:classappend="${build.status == 'COMPLETED' ? 'badge--success' :
+                                          (build.status == 'IN_PROGRESS' ? 'badge--warning' :
+                                          (build.status == 'CANCELLED' ? 'badge--error' : 'badge--muted'))}"
+                          th:text="${build.status}">Status</span>
+                </p>
+            </hgroup>
+        </header>
+
+        <!-- Summary Section (lazy-loaded) -->
+        <section id="build-summary"
+                 th:hx-get="@{/status/fragment/build-summary/{id}(id=${build.id})}"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+            <article aria-busy="true">Loading summary...</article>
+        </section>
+
+        <!-- Kanban Section (lazy-loaded) -->
+        <section id="build-kanban"
+                 th:hx-get="@{/status/fragment/build-kanban/{id}(id=${build.id})}"
+                 hx-trigger="load, partUpdated from:body"
+                 hx-swap="innerHTML">
+            <article aria-busy="true">Loading parts...</article>
+        </section>
+    </main>
+
+    <!-- Global CSRF Token for HTMX requests -->
+    <input type="hidden" id="csrf-token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</body>
+</html>

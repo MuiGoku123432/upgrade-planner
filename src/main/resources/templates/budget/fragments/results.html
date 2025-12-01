@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="results">
+    <!-- Top Summary Cards -->
+    <div class="grid">
+        <article>
+            <header>Total (Selected)</header>
+            <p class="budget-amount" th:text="${'$' + #numbers.formatDecimal(result.combinedCost != null ? result.combinedCost : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            <footer th:text="${result.totalItemsCount + ' items'}">0 items</footer>
+        </article>
+        <article>
+            <header>Required</header>
+            <p class="budget-amount" th:text="${'$' + #numbers.formatDecimal(result.requiredCost != null ? result.requiredCost : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            <footer th:text="${result.requiredItemsCount + ' items'}">0 items</footer>
+        </article>
+        <article>
+            <header>Optional</header>
+            <p class="budget-amount" th:text="${'$' + #numbers.formatDecimal(result.optionalCost != null ? result.optionalCost : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            <footer th:text="${result.optionalItemsCount + ' items'}">0 items</footer>
+        </article>
+    </div>
+
+    <!-- Cost by Category Table -->
+    <article th:if="${not #lists.isEmpty(result.byCategory)}">
+        <header><strong>Cost by Category</strong></header>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Required</th>
+                    <th>Optional</th>
+                    <th>Total</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="cat : ${result.byCategory}">
+                    <td th:text="${cat.categoryLabel}">Category</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(cat.requiredCost != null ? cat.requiredCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(cat.optionalCost != null ? cat.optionalCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(cat.combinedCost != null ? cat.combinedCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${cat.itemCount}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+
+    <!-- Cost by Tier Table -->
+    <article th:if="${not #lists.isEmpty(result.byTier)}">
+        <header><strong>Cost by Tier</strong></header>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tier</th>
+                    <th>Cost</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tier : ${result.byTier}">
+                    <td th:text="${tier.tierLabel}">Tier</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(tier.cost != null ? tier.cost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${tier.itemCount}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+
+    <!-- Monthly Plan Table -->
+    <article th:if="${not #lists.isEmpty(result.byMonth)}">
+        <header><strong>Monthly Plan</strong></header>
+        <table>
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Required</th>
+                    <th>Optional</th>
+                    <th>Total</th>
+                    <th>Items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="month : ${result.byMonth}">
+                    <td th:text="${month.yearMonth}">2025-01</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(month.requiredCost != null ? month.requiredCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(month.optionalCost != null ? month.optionalCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(month.combinedCost != null ? month.combinedCost : 0, 1, 'COMMA', 2, 'POINT')}">$0</td>
+                    <td th:text="${month.itemCount}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+
+    <!-- Empty state -->
+    <article th:if="${result.totalItemsCount == 0}">
+        <p>No items match the selected filters.</p>
+    </article>
+
+    <!-- Line Items Section (expandable details) -->
+    <details th:if="${result.totalItemsCount > 0}">
+        <summary>View Line Items (<span th:text="${result.totalItemsCount}">0</span> items)</summary>
+        <div th:hx-get="@{/budget/build/{id}/fragment/line-items(id=${buildId})}"
+             hx-trigger="toggle once from:closest details"
+             hx-include="#budget-filters"
+             hx-swap="innerHTML">
+            <article aria-busy="true">Loading line items...</article>
+        </div>
+    </details>
+</th:block>
+</body>
+</html>
