@@ -1,0 +1,6 @@
+name,categoryCode,tierCode,price,status,brand,productUrl,priorityValue,isRequired
+"Fox 2.5 Factory Coilover",SUSPENSION,PREMIUM,2500.00,PLANNED,"Fox Racing Shox","https://www.foxracingshox.com",10,true
+"Bilstein 5100 Shock",SUSPENSION,MID,400.00,PLANNED,Bilstein,,20,true
+"ARB Bumper",ARMOR,PREMIUM,1200.00,PLANNED,ARB,"https://www.arbusa.com",30,false
+"Warn Winch 10000lb",RECOVERY,PREMIUM,1500.00,PLANNED,Warn,,40,true
+"BFGoodrich KO2 Tires",WHEELS_TIRES,PREMIUM,1200.00,PLANNED,BFGoodrich,,50,true

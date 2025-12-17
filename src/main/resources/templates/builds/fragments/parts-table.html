@@ -5,16 +5,22 @@
 <th:block th:fragment="parts-table">
     <div class="parts-table-container"
          th:hx-get="@{/builds/{buildId}/parts-table(buildId=${buildId})}"
-         hx-trigger="partCreated from:body, partUpdated from:body"
+         hx-trigger="partCreated from:body, partUpdated from:body, partsImported from:body"
          hx-swap="outerHTML"
          hx-select="unset">
-        <!-- Add Part Button -->
-        <div class="parts-header">
+        <!-- Add Part / Import Buttons -->
+        <div class="parts-header" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <button class="outline secondary"
                     th:hx-get="@{/builds/modals/add-part(buildId=${buildId})}"
                     hx-target="#modal-container"
                     hx-swap="innerHTML">
                 + Add Part
+            </button>
+            <button class="outline secondary"
+                    th:hx-get="@{/builds/modals/import-parts(buildId=${buildId})}"
+                    hx-target="#modal-container"
+                    hx-swap="innerHTML">
+                Import CSV
             </button>
         </div>
 

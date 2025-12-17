@@ -7,6 +7,7 @@ import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
 import com.sentinovo.carbuildervin.dto.parts.PartCreateDto;
 import com.sentinovo.carbuildervin.dto.parts.PartDto;
 import com.sentinovo.carbuildervin.dto.parts.PartUpdateDto;
+import com.sentinovo.carbuildervin.dto.parts.csv.CsvImportResultDto;
 import com.sentinovo.carbuildervin.dto.parts.lookup.PartCategoryDto;
 import com.sentinovo.carbuildervin.dto.parts.lookup.PartTierDto;
 import com.sentinovo.carbuildervin.dto.upgrade.UpgradeCategoryDto;
@@ -16,6 +17,7 @@ import com.sentinovo.carbuildervin.dto.vehicle.VehicleUpdateDto;
 import com.sentinovo.carbuildervin.service.parts.PartCategoryService;
 import com.sentinovo.carbuildervin.service.parts.PartService;
 import com.sentinovo.carbuildervin.service.parts.PartTierService;
+import com.sentinovo.carbuildervin.service.parts.csv.PartCsvImportService;
 import com.sentinovo.carbuildervin.service.user.AuthenticationService;
 import com.sentinovo.carbuildervin.service.vehicle.UpgradeCategoryService;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleService;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +54,7 @@ public class BuildsWebController {
     private final PartService partService;
     private final PartCategoryService partCategoryService;
     private final PartTierService partTierService;
+    private final PartCsvImportService partCsvImportService;
     private final UpgradeCategoryService upgradeCategoryService;
     private final AuthenticationService authenticationService;
 
@@ -152,6 +156,60 @@ public class BuildsWebController {
         model.addAttribute("part", new PartCreateDto());
 
         return "builds/modals/part-modal";
+    }
+
+    /**
+     * Show import parts modal (HTMX)
+     */
+    @GetMapping("/modals/import-parts")
+    public String showImportPartsModal(@RequestParam UUID buildId, Model model, CsrfToken csrfToken) {
+        model.addAttribute("_csrf", csrfToken);
+        model.addAttribute("buildId", buildId);
+        return "builds/modals/import-parts-modal";
+    }
+
+    /**
+     * Import parts from CSV (HTMX)
+     */
+    @PostMapping("/import-parts")
+    public String importParts(@RequestParam UUID buildId,
+                             @RequestParam("file") MultipartFile file,
+                             Model model,
+                             CsrfToken csrfToken,
+                             HttpServletRequest request,
+                             HttpServletResponse response) {
+
+        log.info("CSV import for build: {}", buildId);
+
+        try {
+            // Validate file
+            if (file.isEmpty()) {
+                model.addAttribute("_csrf", csrfToken);
+                model.addAttribute("buildId", buildId);
+                model.addAttribute("error", "Please select a file to upload");
+                return "builds/modals/import-parts-modal";
+            }
+
+            CsvImportResultDto result = partCsvImportService.importParts(buildId, file);
+
+            model.addAttribute("result", result);
+            model.addAttribute("buildId", buildId);
+            model.addAttribute("_csrf", csrfToken);
+
+            // Set trigger to refresh parts table if any imports succeeded
+            if (result.getSuccessCount() > 0 && isHtmxRequest(request)) {
+                response.setHeader("HX-Trigger", "partsImported");
+            }
+
+            return "builds/modals/import-parts-result";
+
+        } catch (Exception e) {
+            log.error("Error importing parts", e);
+            model.addAttribute("_csrf", csrfToken);
+            model.addAttribute("buildId", buildId);
+            model.addAttribute("error", "Failed to import parts: " + e.getMessage());
+            return "builds/modals/import-parts-modal";
+        }
     }
 
     /**

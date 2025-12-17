@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Import Parts Modal -->
+<div class="jarvis-theme modal"
+     hx-on:click="if(event.target===this) document.getElementById('modal-container').innerHTML=''">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h4>Import Parts from CSV</h4>
+                </div>
+                <button type="button" class="modal-close"
+                        hx-on:click="document.getElementById('modal-container').innerHTML=''">&times;</button>
+            </div>
+
+            <form hx-post="/builds/import-parts"
+                  hx-target="#modal-container"
+                  hx-swap="innerHTML"
+                  hx-encoding="multipart/form-data">
+
+                <!-- CSRF Token -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="buildId" th:value="${buildId}">
+
+                <div class="modal-body">
+                    <!-- Error Messages -->
+                    <div th:if="${error}" class="alert alert-error" style="color: #ff4444; margin-bottom: 1rem;">
+                        <span th:text="${error}">Error message</span>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label for="file">CSV File <span class="required">*</span></label>
+                        <input type="file"
+                               id="file"
+                               name="file"
+                               accept=".csv,text/csv"
+                               required>
+                        <small class="form-text">Upload a CSV file with parts data</small>
+                    </div>
+
+                    <!-- CSV Format Help -->
+                    <details class="csv-help" style="margin-top: 1rem;">
+                        <summary style="cursor: pointer; color: var(--primary);">CSV Format Guide</summary>
+                        <div style="padding: 1rem; background: var(--card-background-color); border-radius: 4px; margin-top: 0.5rem;">
+                            <p><strong>Required columns:</strong></p>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li><code>name</code> - Part name (required)</li>
+                                <li><code>categoryCode</code> - Category code (required)</li>
+                            </ul>
+                            <p style="margin-top: 0.5rem;"><strong>Optional columns:</strong></p>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li><code>tierCode</code> - Quality tier code</li>
+                                <li><code>price</code> - Price (decimal)</li>
+                                <li><code>status</code> - PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED</li>
+                                <li><code>brand</code> - Brand name</li>
+                                <li><code>productUrl</code> - Product link (must start with http:// or https://)</li>
+                                <li><code>priorityValue</code> - Priority (1-1000, lower = higher priority)</li>
+                                <li><code>isRequired</code> - true/false</li>
+                            </ul>
+                            <p style="margin-top: 0.5rem;"><strong>Example:</strong></p>
+                            <pre style="font-size: 0.8rem; overflow-x: auto; background: var(--code-background-color); padding: 0.5rem; border-radius: 4px;">name,categoryCode,tierCode,price,status,brand
+Fox 2.5 Coilover,SUSPENSION,PERFORMANCE,2500.00,PLANNED,Fox Racing
+Bilstein 5100,SUSPENSION,OEM_PLUS,400.00,PLANNED,Bilstein</pre>
+                            <p style="margin-top: 0.5rem;">
+                                <a th:href="@{/static/templates/parts-import-template.csv}" download style="color: var(--primary);">
+                                    Download template CSV
+                                </a>
+                            </p>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            hx-on:click="document.getElementById('modal-container').innerHTML=''">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span>Import Parts</span>
+                        <span class="htmx-indicator" style="margin-left: 0.5rem; display: none;">...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</html>

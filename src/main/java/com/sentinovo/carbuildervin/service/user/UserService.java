@@ -17,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.time.OffsetDateTime;
+import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -278,6 +281,103 @@ public class UserService {
         user.setIsActive(false);
         userRepository.save(user);
         log.info("Successfully deleted user with id: {}", userId);
+    }
+
+    // ========================================
+    // MCP API Key Management
+    // ========================================
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int API_KEY_LENGTH = 32; // 32 bytes = 64 hex characters
+
+    /**
+     * Generate a new MCP API key for the user. This revokes any existing key.
+     * @param userId the user ID
+     * @return the new API key (plaintext, shown only once)
+     */
+    public String generateMcpApiKey(UUID userId) {
+        log.info("Generating new MCP API key for user: {}", userId);
+
+        User user = findById(userId);
+
+        // Generate a new random API key
+        byte[] keyBytes = new byte[API_KEY_LENGTH];
+        SECURE_RANDOM.nextBytes(keyBytes);
+        String apiKey = HexFormat.of().formatHex(keyBytes);
+
+        // Store the key and timestamp
+        user.setMcpApiKey(apiKey);
+        user.setMcpApiKeyCreatedAt(OffsetDateTime.now());
+
+        userRepository.save(user);
+        log.info("Successfully generated MCP API key for user: {}", userId);
+
+        return apiKey;
+    }
+
+    /**
+     * Revoke the MCP API key for the user.
+     * @param userId the user ID
+     */
+    public void revokeMcpApiKey(UUID userId) {
+        log.info("Revoking MCP API key for user: {}", userId);
+
+        User user = findById(userId);
+        user.setMcpApiKey(null);
+        user.setMcpApiKeyCreatedAt(null);
+
+        userRepository.save(user);
+        log.info("Successfully revoked MCP API key for user: {}", userId);
+    }
+
+    /**
+     * Check if user has an MCP API key.
+     * @param userId the user ID
+     * @return true if user has an API key
+     */
+    @Transactional(readOnly = true)
+    public boolean hasMcpApiKey(UUID userId) {
+        User user = findById(userId);
+        return user.getMcpApiKey() != null;
+    }
+
+    /**
+     * Get masked MCP API key info for display.
+     * @param userId the user ID
+     * @return masked key (first 8 chars + "..." + last 4 chars) or null if no key
+     */
+    @Transactional(readOnly = true)
+    public String getMaskedMcpApiKey(UUID userId) {
+        User user = findById(userId);
+        String key = user.getMcpApiKey();
+        if (key == null || key.length() < 12) {
+            return null;
+        }
+        return key.substring(0, 8) + "..." + key.substring(key.length() - 4);
+    }
+
+    /**
+     * Get the creation timestamp of the MCP API key.
+     * @param userId the user ID
+     * @return creation timestamp or null if no key
+     */
+    @Transactional(readOnly = true)
+    public OffsetDateTime getMcpApiKeyCreatedAt(UUID userId) {
+        User user = findById(userId);
+        return user.getMcpApiKeyCreatedAt();
+    }
+
+    /**
+     * Find user by MCP API key (for authentication).
+     * @param apiKey the API key
+     * @return the user if found and active
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findByMcpApiKey(String apiKey) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return Optional.empty();
+        }
+        return userRepository.findByMcpApiKeyWithRoles(apiKey);
     }
 
 }
