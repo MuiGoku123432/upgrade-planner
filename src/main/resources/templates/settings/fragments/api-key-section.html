@@ -1,0 +1,71 @@
+<th:block th:fragment="api-key-section">
+    <div class="jarvis-card api-key-card">
+        <!-- Success/Info Message -->
+        <div th:if="${message}" class="alert alert-success" style="margin-bottom: 1rem;">
+            <span th:text="${message}">Message</span>
+        </div>
+
+        <!-- Has API Key State -->
+        <div th:if="${hasApiKey}" class="api-key-status">
+            <div class="api-key-info">
+                <div class="api-key-row">
+                    <span class="api-key-label">Status:</span>
+                    <span class="badge badge--success">Active</span>
+                </div>
+                <div class="api-key-row">
+                    <span class="api-key-label">Key:</span>
+                    <code class="api-key-value" th:text="${maskedKey}">a1b2c3d4...ef56</code>
+                </div>
+                <div class="api-key-row" th:if="${apiKeyCreatedAt}">
+                    <span class="api-key-label">Created:</span>
+                    <span th:text="${#temporals.format(apiKeyCreatedAt, 'MMM d, yyyy ''at'' h:mm a')}">Dec 17, 2025 at 3:45 PM</span>
+                </div>
+            </div>
+
+            <div class="api-key-actions">
+                <button type="button"
+                        class="btn btn-primary"
+                        hx-post="/settings/api-key/generate"
+                        hx-target="#api-key-section"
+                        hx-swap="innerHTML"
+                        hx-include="#csrf-token"
+                        hx-confirm="This will revoke your existing API key and generate a new one. Any integrations using the current key will stop working. Continue?">
+                    Regenerate Key
+                </button>
+                <button type="button"
+                        class="btn btn-secondary btn-danger"
+                        hx-delete="/settings/api-key"
+                        hx-target="#api-key-section"
+                        hx-swap="innerHTML"
+                        hx-include="#csrf-token"
+                        hx-confirm="Are you sure you want to revoke your API key? Any integrations using this key will stop working.">
+                    Revoke Key
+                </button>
+            </div>
+        </div>
+
+        <!-- No API Key State -->
+        <div th:unless="${hasApiKey}" class="api-key-status">
+            <div class="api-key-info">
+                <div class="api-key-row">
+                    <span class="api-key-label">Status:</span>
+                    <span class="badge badge--muted">Not configured</span>
+                </div>
+                <p class="text-muted" style="margin-top: 1rem;">
+                    You don't have an API key yet. Generate one to connect AI assistants to your account.
+                </p>
+            </div>
+
+            <div class="api-key-actions">
+                <button type="button"
+                        class="btn btn-primary"
+                        hx-post="/settings/api-key/generate"
+                        hx-target="#api-key-section"
+                        hx-swap="innerHTML"
+                        hx-include="#csrf-token">
+                    Generate API Key
+                </button>
+            </div>
+        </div>
+    </div>
+</th:block>

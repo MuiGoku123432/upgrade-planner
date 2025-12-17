@@ -1,0 +1,52 @@
+<th:block th:fragment="api-key-generated">
+    <div class="jarvis-card api-key-card api-key-generated">
+        <!-- Success Message -->
+        <div class="alert alert-success">
+            <strong>API Key Generated Successfully!</strong>
+        </div>
+
+        <!-- Warning -->
+        <div class="alert alert-warning" style="margin-top: 1rem;">
+            <strong>Important:</strong> Copy this key now. For security reasons, it won't be displayed again.
+        </div>
+
+        <!-- API Key Display -->
+        <div class="api-key-display">
+            <label>Your new API key:</label>
+            <div class="api-key-copy-container">
+                <code id="api-key-value" class="api-key-full" th:text="${apiKey}">your-api-key-here</code>
+                <button type="button" class="btn btn-secondary copy-btn" onclick="copyApiKey()">
+                    Copy
+                </button>
+            </div>
+            <small id="copy-feedback" class="copy-feedback" style="display: none;">Copied to clipboard!</small>
+        </div>
+
+        <!-- Done Button -->
+        <div class="api-key-actions" style="margin-top: 1.5rem;">
+            <button type="button"
+                    class="btn btn-primary"
+                    hx-get="/settings/fragment/api-key"
+                    hx-target="#api-key-section"
+                    hx-swap="innerHTML">
+                Done
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function copyApiKey() {
+            const keyValue = document.getElementById('api-key-value').textContent;
+            navigator.clipboard.writeText(keyValue).then(() => {
+                const feedback = document.getElementById('copy-feedback');
+                feedback.style.display = 'block';
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            });
+        }
+    </script>
+</th:block>

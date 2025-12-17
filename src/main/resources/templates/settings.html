@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Car Builder VIN</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+    <link rel="stylesheet" th:href="@{/css/settings.css}">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" class="contrast"><strong>Car Builder VIN</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/builds">Builds</a></li>
+            <li><a href="/status">Status</a></li>
+            <li><a href="/budget">Budget</a></li>
+            <li><a href="/settings" class="contrast">Settings</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <span sec:authentication="name">User</span>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="outline contrast">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="jarvis-theme container">
+        <div id="main-content">
+            <!-- Page Header -->
+            <header class="settings-header">
+                <h1>Settings</h1>
+                <p class="text-muted">Manage your account settings and API access</p>
+            </header>
+
+            <!-- MCP API Key Section -->
+            <section class="settings-section">
+                <h2>MCP API Key</h2>
+                <p class="text-muted">
+                    Use your API key to connect external AI assistants (like Claude) to your Car Builder data via the MCP protocol.
+                </p>
+
+                <div id="api-key-section"
+                     th:insert="~{settings/fragments/api-key-section :: api-key-section}">
+                    <!-- API key content loaded here -->
+                </div>
+            </section>
+
+            <!-- Usage Instructions -->
+            <section class="settings-section">
+                <h2>How to Use Your API Key</h2>
+                <div class="jarvis-card">
+                    <p>Once you have an API key, configure your MCP client with the following:</p>
+                    <div class="code-block">
+                        <code>
+<pre>{
+  "mcpServers": {
+    "car-builder-vin": {
+      "url": "<span th:text="${#request.requestURL.toString().replace('/settings', '')}">https://your-server.com</span>/mcp/sse",
+      "headers": {
+        "X-MCP-API-Key": "your-api-key-here"
+      }
+    }
+  }
+}</pre>
+                        </code>
+                    </div>
+                    <p class="text-muted" style="margin-top: 1rem; font-size: 0.9rem;">
+                        The MCP server provides tools to manage your vehicles, builds, parts, and more through AI assistants.
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- CSRF Token for HTMX requests -->
+    <input type="hidden" id="csrf-token" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</body>
+</html>

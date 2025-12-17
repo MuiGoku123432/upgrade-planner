@@ -25,6 +25,7 @@
             <li><a href="/builds" class="contrast">Builds</a></li>
             <li><a href="/status">Status</a></li>
             <li><a href="/budget">Budget</a></li>
+            <li sec:authorize="isAuthenticated()"><a href="/settings">Settings</a></li>
             <li sec:authorize="isAuthenticated()">
                 <span sec:authentication="name">User</span>
             </li>

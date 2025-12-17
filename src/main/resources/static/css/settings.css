@@ -1,0 +1,184 @@
+/* Settings Page Styles */
+
+.settings-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-header h1 {
+    margin-bottom: 0.5rem;
+}
+
+.settings-section {
+    margin-bottom: 2.5rem;
+}
+
+.settings-section h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.settings-section > p {
+    margin-bottom: 1rem;
+}
+
+/* API Key Card */
+.api-key-card {
+    padding: 1.5rem;
+}
+
+.api-key-status {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.api-key-info {
+    flex: 1;
+}
+
+.api-key-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.api-key-label {
+    font-weight: 600;
+    min-width: 80px;
+    color: var(--muted-color);
+}
+
+.api-key-value {
+    font-family: monospace;
+    background: var(--background-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.95rem;
+}
+
+.api-key-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Badge for muted/inactive state */
+.badge--muted {
+    background: var(--muted-border-color);
+    color: var(--muted-color);
+}
+
+/* Danger button variant */
+.btn-danger {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+.btn-danger:hover {
+    background: var(--color-error);
+    color: white;
+}
+
+/* API Key Generated State */
+.api-key-generated .alert {
+    text-align: center;
+}
+
+.api-key-display {
+    margin-top: 1.5rem;
+}
+
+.api-key-display label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.api-key-copy-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.api-key-full {
+    flex: 1;
+    font-family: monospace;
+    background: var(--background-color);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+    font-size: 0.9rem;
+    word-break: break-all;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+}
+
+.copy-btn {
+    white-space: nowrap;
+}
+
+.copy-feedback {
+    color: var(--color-success);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* Alert Styles */
+.alert-success {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+}
+
+.alert-warning {
+    background: rgba(255, 149, 0, 0.1);
+    border: 1px solid var(--color-warning);
+    color: var(--color-warning);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+}
+
+/* Code Block for MCP Config */
+.code-block {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.code-block pre {
+    margin: 0;
+    font-family: monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.code-block code {
+    background: none;
+    padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .api-key-copy-container {
+        flex-direction: column;
+    }
+
+    .api-key-actions {
+        flex-direction: column;
+    }
+
+    .api-key-actions .btn {
+        width: 100%;
+    }
+}
