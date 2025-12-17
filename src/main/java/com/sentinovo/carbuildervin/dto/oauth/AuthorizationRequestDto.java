@@ -7,16 +7,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * OAuth 2.0 Authorization Request parameters.
  * Used when redirecting to /oauth/authorize endpoint.
+ * Implements Serializable because it's stored in HTTP session.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "OAuth 2.0 authorization request parameters")
-public class AuthorizationRequestDto {
+public class AuthorizationRequestDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotBlank(message = "response_type is required")
     @Schema(description = "Must be 'code' for authorization code flow", example = "code")
@@ -35,6 +40,12 @@ public class AuthorizationRequestDto {
 
     @Schema(description = "Client state value for CSRF protection", example = "xyz123")
     private String state;
+
+    @Schema(description = "PKCE code challenge", example = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")
+    private String codeChallenge;
+
+    @Schema(description = "PKCE code challenge method", example = "S256")
+    private String codeChallengeMethod;
 
     /**
      * Validates that this is a valid authorization code request.

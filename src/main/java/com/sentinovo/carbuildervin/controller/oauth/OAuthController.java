@@ -56,6 +56,8 @@ public class OAuthController {
             @RequestParam("redirect_uri") String redirectUri,
             @RequestParam(value = "scope", required = false) String scope,
             @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "code_challenge", required = false) String codeChallenge,
+            @RequestParam(value = "code_challenge_method", required = false) String codeChallengeMethod,
             HttpSession session,
             Model model) {
 
@@ -65,6 +67,8 @@ public class OAuthController {
                 .redirectUri(redirectUri)
                 .scope(scope)
                 .state(state)
+                .codeChallenge(codeChallenge)
+                .codeChallengeMethod(codeChallengeMethod)
                 .build();
 
         try {
@@ -118,6 +122,8 @@ public class OAuthController {
                 authRequest.getRedirectUri(),
                 authRequest.getScope(),
                 authRequest.getState(),
+                authRequest.getCodeChallenge(),
+                authRequest.getCodeChallengeMethod(),
                 session,
                 model
         );
