@@ -24,6 +24,23 @@ public class OAuthMetadataController {
     private final OAuthProperties oAuthProperties;
 
     /**
+     * OAuth 2.0 Protected Resource Metadata (RFC 9728)
+     * MCP clients MUST use this for authorization server discovery.
+     * This tells clients which authorization server(s) can issue tokens for this resource.
+     */
+    @GetMapping(value = "/.well-known/oauth-protected-resource", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Protected resource metadata", description = "Returns OAuth 2.0 protected resource metadata (RFC 9728) for MCP authorization discovery")
+    public Map<String, Object> protectedResourceMetadata() {
+        String issuer = oAuthProperties.getIssuer();
+
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        metadata.put("resource", issuer);
+        metadata.put("authorization_servers", List.of(issuer));
+        metadata.put("bearer_methods_supported", List.of("header"));
+        return metadata;
+    }
+
+    /**
      * OAuth 2.0 Authorization Server Metadata (RFC 8414)
      * MCP clients use this to discover OAuth endpoints.
      */
