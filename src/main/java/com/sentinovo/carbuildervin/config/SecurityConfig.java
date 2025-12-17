@@ -62,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                 // OAuth endpoints
+                .requestMatchers("/.well-known/**").permitAll()
                 .requestMatchers("/oauth/token").permitAll()
                 .requestMatchers("/oauth/revoke").permitAll()
                 .requestMatchers("/oauth/authorize").authenticated()

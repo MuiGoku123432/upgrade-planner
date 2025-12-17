@@ -1,5 +1,6 @@
 package com.sentinovo.carbuildervin.controller.oauth;
 
+import com.sentinovo.carbuildervin.config.OAuthProperties;
 import com.sentinovo.carbuildervin.dto.oauth.*;
 import com.sentinovo.carbuildervin.entities.oauth.OAuthClient;
 import com.sentinovo.carbuildervin.entities.user.User;
@@ -20,6 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -35,6 +38,7 @@ public class OAuthController {
 
     private final OAuthService oAuthService;
     private final AuthenticationService authenticationService;
+    private final OAuthProperties oAuthProperties;
 
     private static final String SESSION_OAUTH_REQUEST = "oauth_auth_request";
 
