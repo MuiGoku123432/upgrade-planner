@@ -70,7 +70,7 @@
 <pre>{
   "mcpServers": {
     "car-builder-vin": {
-      "url": "<span th:text="${#request.requestURL.toString().replace('/settings', '')}">https://your-server.com</span>/mcp/sse",
+      "url": "<span th:text="${baseUrl}">https://your-server.com</span>/mcp/sse",
       "headers": {
         "X-MCP-API-Key": "your-api-key-here"
       }

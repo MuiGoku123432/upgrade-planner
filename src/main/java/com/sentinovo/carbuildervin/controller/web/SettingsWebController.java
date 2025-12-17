@@ -2,6 +2,7 @@ package com.sentinovo.carbuildervin.controller.web;
 
 import com.sentinovo.carbuildervin.service.user.AuthenticationService;
 import com.sentinovo.carbuildervin.service.user.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -27,11 +28,20 @@ public class SettingsWebController {
      * Main settings page
      */
     @GetMapping
-    public String settingsPage(Model model) {
+    public String settingsPage(Model model, HttpServletRequest request) {
         UUID currentUserId = authenticationService.getCurrentUserId();
         log.debug("Loading settings page for user: {}", currentUserId);
 
         populateApiKeyModel(model, currentUserId);
+
+        // Build base URL for MCP configuration example
+        String baseUrl = request.getScheme() + "://" + request.getServerName();
+        int port = request.getServerPort();
+        if ((request.getScheme().equals("http") && port != 80) ||
+            (request.getScheme().equals("https") && port != 443)) {
+            baseUrl += ":" + port;
+        }
+        model.addAttribute("baseUrl", baseUrl);
 
         return "settings";
     }
