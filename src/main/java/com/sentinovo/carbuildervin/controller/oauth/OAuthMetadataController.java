@@ -37,6 +37,7 @@ public class OAuthMetadataController {
         metadata.put("authorization_endpoint", issuer + "/oauth/authorize");
         metadata.put("token_endpoint", issuer + "/oauth/token");
         metadata.put("revocation_endpoint", issuer + "/oauth/revoke");
+        metadata.put("registration_endpoint", issuer + "/oauth/register");
         metadata.put("response_types_supported", List.of("code"));
         metadata.put("grant_types_supported", List.of("authorization_code", "refresh_token"));
         metadata.put("token_endpoint_auth_methods_supported", List.of("client_secret_post", "none"));

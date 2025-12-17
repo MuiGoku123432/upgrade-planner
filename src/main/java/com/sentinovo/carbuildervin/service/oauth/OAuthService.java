@@ -294,6 +294,92 @@ public class OAuthService {
                 codesDeleted, tokensDeleted);
     }
 
+    /**
+     * Register a new OAuth client dynamically (RFC 7591).
+     * Used by MCP clients like ChatGPT Desktop to register themselves.
+     */
+    public ClientRegistrationResponseDto registerClient(ClientRegistrationRequestDto request) {
+        // Validate required fields
+        if (request.getRedirectUris() == null || request.getRedirectUris().isEmpty()) {
+            throw new OAuthException(OAuthErrorDto.INVALID_REQUEST,
+                    "redirect_uris is required");
+        }
+
+        // Generate unique client_id
+        String clientId = "dyn_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+
+        // Determine if client is confidential or public based on token_endpoint_auth_method
+        String authMethod = request.getTokenEndpointAuthMethod();
+        boolean isConfidential = !"none".equals(authMethod);
+
+        // Generate client secret for confidential clients
+        String clientSecret = null;
+        String hashedSecret = null;
+        if (isConfidential) {
+            clientSecret = jwtTokenService.generateRefreshToken(); // Reuse secure random generation
+            hashedSecret = passwordEncoder.encode(clientSecret);
+        } else {
+            // Public clients still need a placeholder secret (database NOT NULL constraint)
+            hashedSecret = passwordEncoder.encode(UUID.randomUUID().toString());
+        }
+
+        // Determine client name (use provided or generate default)
+        String clientName = request.getClientName();
+        if (clientName == null || clientName.isBlank()) {
+            clientName = "Dynamic Client " + clientId.substring(4, 12);
+        }
+
+        // Build redirect URIs as JSON array string
+        String redirectUris = "[" + String.join(",",
+                request.getRedirectUris().stream()
+                        .map(uri -> "\"" + uri + "\"")
+                        .toList()) + "]";
+
+        // Determine scopes (use provided or default)
+        String scopes = request.getScope();
+        if (scopes == null || scopes.isBlank()) {
+            scopes = "mcp:read mcp:write";
+        }
+
+        // Create and save the client
+        OAuthClient client = OAuthClient.builder()
+                .clientId(clientId)
+                .clientSecret(hashedSecret)
+                .clientName(clientName)
+                .redirectUris(redirectUris)
+                .scopes(scopes)
+                .isConfidential(isConfidential)
+                .isActive(true)
+                .build();
+
+        clientRepository.save(client);
+        log.info("Registered new OAuth client: {} ({})", clientId, clientName);
+
+        // Build response
+        List<String> grantTypes = request.getGrantTypes();
+        if (grantTypes == null || grantTypes.isEmpty()) {
+            grantTypes = List.of("authorization_code", "refresh_token");
+        }
+
+        List<String> responseTypes = request.getResponseTypes();
+        if (responseTypes == null || responseTypes.isEmpty()) {
+            responseTypes = List.of("code");
+        }
+
+        return ClientRegistrationResponseDto.builder()
+                .clientId(clientId)
+                .clientSecret(isConfidential ? clientSecret : null)
+                .clientIdIssuedAt(System.currentTimeMillis() / 1000)
+                .clientSecretExpiresAt(0L) // Never expires
+                .clientName(clientName)
+                .redirectUris(request.getRedirectUris())
+                .grantTypes(grantTypes)
+                .responseTypes(responseTypes)
+                .tokenEndpointAuthMethod(isConfidential ? "client_secret_post" : "none")
+                .scope(scopes)
+                .build();
+    }
+
     // --- Private helpers ---
 
     private OAuthClient validateClientCredentials(String clientId, String clientSecret) {

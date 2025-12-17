@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/.well-known/**").permitAll()
                 .requestMatchers("/oauth/token").permitAll()
                 .requestMatchers("/oauth/revoke").permitAll()
+                .requestMatchers("/oauth/register").permitAll()
                 .requestMatchers("/oauth/authorize").authenticated()
                 .requestMatchers("/oauth/authorize/continue").authenticated()
                 .requestMatchers("/oauth/error").permitAll()
@@ -111,7 +112,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRequestHandler(requestHandler)
                 .ignoringRequestMatchers("/api/v1/**")
-                .ignoringRequestMatchers("/oauth/token", "/oauth/revoke")
+                .ignoringRequestMatchers("/oauth/token", "/oauth/revoke", "/oauth/register")
                 .ignoringRequestMatchers("/mcp/**")
             )
             .headers(headers -> headers

@@ -225,6 +225,25 @@ public class OAuthController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Dynamic Client Registration endpoint (RFC 7591).
+     * Allows MCP clients to register themselves automatically.
+     */
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE,
+                 produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @Operation(summary = "OAuth client registration", description = "Register a new OAuth client dynamically (RFC 7591)")
+    public ResponseEntity<?> registerClient(@RequestBody ClientRegistrationRequestDto request) {
+        try {
+            ClientRegistrationResponseDto response = oAuthService.registerClient(request);
+            log.info("Dynamically registered OAuth client: {}", response.getClientId());
+            return ResponseEntity.status(201).body(response);
+        } catch (OAuthException e) {
+            log.warn("Client registration error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.toErrorDto());
+        }
+    }
+
     // --- Private helpers ---
 
     private String buildRedirectWithCode(String redirectUri, String code, String state) {
