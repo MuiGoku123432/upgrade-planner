@@ -368,7 +368,7 @@ public class OAuthService {
 
         return ClientRegistrationResponseDto.builder()
                 .clientId(clientId)
-                .clientSecret(isConfidential ? clientSecret : null)
+                .clientSecret(isConfidential ? clientSecret : "")
                 .clientIdIssuedAt(System.currentTimeMillis() / 1000)
                 .clientSecretExpiresAt(0L) // Never expires
                 .clientName(clientName)
