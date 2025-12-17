@@ -21,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -117,6 +118,110 @@ public class UserController extends BaseController {
         
         log.info("Password changed successfully for user ID: {}", currentUser.getId());
         return success(null, "Password changed successfully");
+    }
+
+    // ========================================
+    // MCP API Key Management
+    // ========================================
+
+    @Operation(summary = "Get MCP API key status", description = "Get the current MCP API key status (masked) and creation date")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "API key status retrieved successfully",
+            content = @Content(schema = @Schema(implementation = McpApiKeyResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+            content = @Content(schema = @Schema(implementation = StandardApiResponse.class)))
+    })
+    @GetMapping("/mcp-api-key")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StandardApiResponse<McpApiKeyResponse>> getMcpApiKeyStatus(Authentication authentication) {
+        String username = authentication.getName();
+        UserDto currentUser = userService.findByUsernameDto(username);
+        log.info("Getting MCP API key status for user ID: {}", currentUser.getId());
+
+        String maskedKey = userService.getMaskedMcpApiKey(currentUser.getId());
+        OffsetDateTime createdAt = userService.getMcpApiKeyCreatedAt(currentUser.getId());
+        boolean hasKey = maskedKey != null;
+
+        McpApiKeyResponse response = new McpApiKeyResponse(hasKey, maskedKey, createdAt);
+        return success(response);
+    }
+
+    @Operation(summary = "Generate MCP API key", description = "Generate a new MCP API key (revokes existing key)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "API key generated successfully",
+            content = @Content(schema = @Schema(implementation = McpApiKeyGenerateResponse.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+            content = @Content(schema = @Schema(implementation = StandardApiResponse.class)))
+    })
+    @PostMapping("/mcp-api-key")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StandardApiResponse<McpApiKeyGenerateResponse>> generateMcpApiKey(Authentication authentication) {
+        String username = authentication.getName();
+        UserDto currentUser = userService.findByUsernameDto(username);
+        log.info("Generating MCP API key for user ID: {}", currentUser.getId());
+
+        String apiKey = userService.generateMcpApiKey(currentUser.getId());
+
+        log.info("MCP API key generated successfully for user ID: {}", currentUser.getId());
+        McpApiKeyGenerateResponse response = new McpApiKeyGenerateResponse(apiKey);
+        return success(response, "MCP API key generated successfully. Save this key - it won't be shown again!");
+    }
+
+    @Operation(summary = "Revoke MCP API key", description = "Revoke the current MCP API key")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "API key revoked successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+            content = @Content(schema = @Schema(implementation = StandardApiResponse.class)))
+    })
+    @DeleteMapping("/mcp-api-key")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> revokeMcpApiKey(Authentication authentication) {
+        String username = authentication.getName();
+        UserDto currentUser = userService.findByUsernameDto(username);
+        log.info("Revoking MCP API key for user ID: {}", currentUser.getId());
+
+        userService.revokeMcpApiKey(currentUser.getId());
+
+        log.info("MCP API key revoked successfully for user ID: {}", currentUser.getId());
+        return noContent();
+    }
+
+    @Schema(description = "MCP API key status response")
+    public static class McpApiKeyResponse {
+        @Schema(description = "Whether user has an API key", example = "true")
+        private boolean hasApiKey;
+
+        @Schema(description = "Masked API key (first 8 + last 4 chars)", example = "a1b2c3d4...ef56")
+        private String maskedKey;
+
+        @Schema(description = "When the API key was created")
+        private OffsetDateTime createdAt;
+
+        public McpApiKeyResponse(boolean hasApiKey, String maskedKey, OffsetDateTime createdAt) {
+            this.hasApiKey = hasApiKey;
+            this.maskedKey = maskedKey;
+            this.createdAt = createdAt;
+        }
+
+        public boolean isHasApiKey() { return hasApiKey; }
+        public void setHasApiKey(boolean hasApiKey) { this.hasApiKey = hasApiKey; }
+        public String getMaskedKey() { return maskedKey; }
+        public void setMaskedKey(String maskedKey) { this.maskedKey = maskedKey; }
+        public OffsetDateTime getCreatedAt() { return createdAt; }
+        public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    }
+
+    @Schema(description = "MCP API key generate response")
+    public static class McpApiKeyGenerateResponse {
+        @Schema(description = "The generated API key (shown only once)", example = "a1b2c3d4e5f6...")
+        private String apiKey;
+
+        public McpApiKeyGenerateResponse(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        public String getApiKey() { return apiKey; }
+        public void setApiKey(String apiKey) { this.apiKey = apiKey; }
     }
 
     @Schema(description = "Change password request")

@@ -54,4 +54,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u " +
            "WHERE u.email = :email AND u.id != :userId")
     boolean existsByEmailAndIdNot(@Param("email") String email, @Param("userId") UUID userId);
+
+    /**
+     * Find user by MCP API key for authentication
+     */
+    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.mcpApiKey = :apiKey AND u.isActive = true")
+    Optional<User> findByMcpApiKeyWithRoles(@Param("apiKey") String apiKey);
+
+    /**
+     * Check if API key exists (for validation)
+     */
+    boolean existsByMcpApiKey(String mcpApiKey);
 }

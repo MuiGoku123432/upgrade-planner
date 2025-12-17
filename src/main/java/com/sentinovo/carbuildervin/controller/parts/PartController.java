@@ -7,7 +7,10 @@ import com.sentinovo.carbuildervin.dto.common.PageResponseDto;
 import com.sentinovo.carbuildervin.dto.parts.PartCreateDto;
 import com.sentinovo.carbuildervin.dto.parts.PartDto;
 import com.sentinovo.carbuildervin.dto.parts.PartUpdateDto;
+import com.sentinovo.carbuildervin.dto.parts.csv.CsvImportResultDto;
+import com.sentinovo.carbuildervin.exception.ValidationException;
 import com.sentinovo.carbuildervin.service.parts.PartService;
+import com.sentinovo.carbuildervin.service.parts.csv.PartCsvImportService;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleService;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleUpgradeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,10 +25,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -38,6 +43,7 @@ import java.util.UUID;
 public class PartController extends BaseController {
 
     private final PartService partService;
+    private final PartCsvImportService partCsvImportService;
     private final VehicleUpgradeService vehicleUpgradeService;
     private final VehicleService vehicleService;
 
@@ -148,6 +154,79 @@ public class PartController extends BaseController {
         
         log.info("Part created successfully with ID: {}", part.getId());
         return created(part, "Part created successfully");
+    }
+
+    @Operation(
+        summary = "Import parts from CSV",
+        description = "Bulk import parts into a build from a CSV file. Supports partial import - valid rows are imported even if some rows fail validation."
+    )
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Import completed (may include partial failures)",
+            content = @Content(schema = @Schema(implementation = CsvImportResultDto.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid file format or empty file",
+            content = @Content(schema = @Schema(implementation = StandardApiResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Build not found",
+            content = @Content(schema = @Schema(implementation = StandardApiResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Access denied - not owner",
+            content = @Content(schema = @Schema(implementation = StandardApiResponse.class))
+        )
+    })
+    @PostMapping(value = "/builds/{buildId}/parts/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StandardApiResponse<CsvImportResultDto>> importPartsFromCsv(
+            @PathVariable UUID buildId,
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication) {
+
+        String username = authentication.getName();
+        log.info("CSV import for build {} by user: {}", buildId, username);
+
+        // Validate file
+        if (file.isEmpty()) {
+            throw new ValidationException("File is empty");
+        }
+
+        String contentType = file.getContentType();
+        String filename = file.getOriginalFilename();
+        boolean isCsvByName = filename != null && filename.toLowerCase().endsWith(".csv");
+        boolean isCsvByType = contentType != null &&
+            (contentType.equals("text/csv") ||
+             contentType.equals("application/vnd.ms-excel") ||
+             contentType.equals("text/plain"));
+
+        if (!isCsvByName && !isCsvByType) {
+            throw new ValidationException("Invalid file type. Please upload a CSV file.");
+        }
+
+        // Verify ownership
+        VehicleUpgradeDto build = vehicleUpgradeService.getVehicleUpgradeById(buildId);
+        vehicleService.verifyOwnership(build.getVehicleId(), username);
+
+        // Perform import
+        CsvImportResultDto result = partCsvImportService.importParts(buildId, file);
+
+        String message;
+        if (result.isFullSuccess()) {
+            message = "All " + result.getSuccessCount() + " parts imported successfully";
+        } else if (result.isPartialSuccess()) {
+            message = String.format("Partial import: %d succeeded, %d failed",
+                    result.getSuccessCount(), result.getFailureCount());
+        } else {
+            message = "Import failed - no parts were imported";
+        }
+
+        return success(result, message);
     }
 
     @Operation(summary = "Update part", description = "Update an existing part")

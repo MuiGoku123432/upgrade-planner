@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,6 +43,13 @@ public class User extends BaseEntity {
     @Builder.Default
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @Size(max = 64, message = "MCP API key must not exceed 64 characters")
+    @Column(name = "mcp_api_key", length = 64, unique = true)
+    private String mcpApiKey;
+
+    @Column(name = "mcp_api_key_created_at")
+    private OffsetDateTime mcpApiKeyCreatedAt;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

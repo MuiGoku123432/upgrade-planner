@@ -39,6 +39,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Spring AI BOM for MCP Server -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -133,6 +141,13 @@
             <version>1.6.3</version>
         </dependency>
 
+        <!-- Apache Commons CSV for CSV parsing -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.12.0</version>
+        </dependency>
+
         <!-- Sentry Spring Boot 3 integration -->
         <dependency>
             <groupId>io.sentry</groupId>
@@ -150,6 +165,12 @@
             <groupId>one.stayfocused.spring</groupId>
             <artifactId>dotenv-spring-boot</artifactId>
             <version>1.0.0</version>
+        </dependency>
+
+        <!-- Spring AI MCP Server (WebMVC/SSE transport) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
         </dependency>
     </dependencies>
 
