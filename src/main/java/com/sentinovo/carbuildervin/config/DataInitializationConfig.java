@@ -1,5 +1,6 @@
 package com.sentinovo.carbuildervin.config;
 
+import com.sentinovo.carbuildervin.service.oauth.OAuthClientInitService;
 import com.sentinovo.carbuildervin.service.parts.PartCategoryService;
 import com.sentinovo.carbuildervin.service.parts.PartTierService;
 import com.sentinovo.carbuildervin.service.user.RoleService;
@@ -20,6 +21,7 @@ public class DataInitializationConfig {
     private final UpgradeCategoryService upgradeCategoryService;
     private final PartCategoryService partCategoryService;
     private final PartTierService partTierService;
+    private final OAuthClientInitService oAuthClientInitService;
 
     @Bean
     @Order(1)
@@ -43,7 +45,11 @@ public class DataInitializationConfig {
                 // Initialize default part tiers
                 partTierService.ensureDefaultTiers();
                 log.info("✓ Default part tiers initialized");
-                
+
+                // Initialize default OAuth clients (ChatGPT Desktop, Claude Desktop, etc.)
+                oAuthClientInitService.ensureDefaultClients();
+                log.info("✓ Default OAuth clients initialized");
+
                 log.info("Default application data initialization completed successfully");
                 
             } catch (Exception e) {

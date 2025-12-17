@@ -1,6 +1,7 @@
 package com.sentinovo.carbuildervin.config;
 
 import com.sentinovo.carbuildervin.mcp.security.McpApiKeyAuthenticationFilter;
+import com.sentinovo.carbuildervin.mcp.security.OAuthBearerTokenFilter;
 import com.sentinovo.carbuildervin.service.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final McpApiKeyAuthenticationFilter mcpApiKeyAuthenticationFilter;
+    private final OAuthBearerTokenFilter oAuthBearerTokenFilter;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -45,29 +47,39 @@ public class SecurityConfig {
         requestHandler.setCsrfRequestAttributeName(null);
 
         http
-            // Add MCP API key filter before form login
+            // Add OAuth Bearer token filter first (checks for Authorization: Bearer header)
+            .addFilterBefore(oAuthBearerTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            // Add MCP API key filter second (fallback if no Bearer token)
             .addFilterBefore(mcpApiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authz -> authz
                 // API endpoints
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/vin/decode").permitAll()
-                // MCP endpoints - filter handles authentication via API key
+                // MCP endpoints - filter handles authentication via API key or Bearer token
                 .requestMatchers("/api/v1/mcp/**").permitAll()
+                .requestMatchers("/mcp/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                
+
+                // OAuth endpoints
+                .requestMatchers("/oauth/token").permitAll()
+                .requestMatchers("/oauth/revoke").permitAll()
+                .requestMatchers("/oauth/authorize").authenticated()
+                .requestMatchers("/oauth/authorize/continue").authenticated()
+                .requestMatchers("/oauth/error").permitAll()
+
                 // Static resources
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/pico-main/**").permitAll()
-                
+
                 // Public pages
                 .requestMatchers("/", "/login", "/signup").permitAll()
                 .requestMatchers("/check-username", "/check-password-strength").permitAll()
                 .requestMatchers("/fragments/nav").permitAll()
-                
+
                 // Protected pages
                 .requestMatchers("/vehicles/**", "/builds/**", "/parts/**", "/vin/**").authenticated()
                 .requestMatchers("/api/v1/**").authenticated()
-                
+
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -98,6 +110,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRequestHandler(requestHandler)
                 .ignoringRequestMatchers("/api/v1/**")
+                .ignoringRequestMatchers("/oauth/token", "/oauth/revoke")
+                .ignoringRequestMatchers("/mcp/**")
             )
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())

@@ -1,5 +1,6 @@
 package com.sentinovo.carbuildervin.controller.common;
 
+import com.sentinovo.carbuildervin.exception.OAuthException;
 import com.sentinovo.carbuildervin.exceptions.ConflictException;
 import com.sentinovo.carbuildervin.exceptions.ExternalServiceException;
 import com.sentinovo.carbuildervin.exceptions.ResourceNotFoundException;
@@ -97,6 +98,13 @@ public class GlobalExceptionHandler {
         log.warn("Illegal argument: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(StandardApiResponse.error("INVALID_ARGUMENT", ex.getMessage()));
+    }
+
+    @ExceptionHandler(OAuthException.class)
+    public ResponseEntity<?> handleOAuthException(OAuthException ex) {
+        log.warn("OAuth error: {} - {}", ex.getOauthError(), ex.getErrorDescription());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ex.toErrorDto());
     }
 
     @ExceptionHandler(Exception.class)

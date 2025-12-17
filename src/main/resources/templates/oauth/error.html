@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorization Error - Car Builder VIN</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/components.css}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="container-fluid">
+        <ul>
+            <li><a href="/" class="contrast"><strong>Car Builder VIN</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/">Home</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="jarvis-theme container">
+        <div id="main-content">
+            <div class="jarvis-card" style="max-width: 500px; margin: 2rem auto; text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">&#x26A0;</div>
+
+                <h2>Authorization Error</h2>
+
+                <p style="color: #ff4444; margin-bottom: 1rem;" th:if="${param.error}">
+                    <strong th:text="${param.error}">Error</strong>
+                </p>
+
+                <p style="color: var(--pico-muted-color);" th:if="${param.error_description}">
+                    <span th:text="${param.error_description}">Error description</span>
+                </p>
+
+                <p style="margin-top: 2rem;">
+                    <a href="/" class="nav-btn nav-btn-primary">Return Home</a>
+                </p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
