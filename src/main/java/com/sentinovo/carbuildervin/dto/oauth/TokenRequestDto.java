@@ -43,6 +43,9 @@ public class TokenRequestDto {
     @Schema(description = "Optional scope for refresh_token grant")
     private String scope;
 
+    @Schema(description = "PKCE code verifier (for authorization_code grant with PKCE)")
+    private String codeVerifier;
+
     public boolean isAuthorizationCodeGrant() {
         return "authorization_code".equals(grantType);
     }

@@ -89,7 +89,8 @@ public class OAuthController {
             if (oAuthService.hasExistingAuthorization(user.getId(), client.getId())) {
                 // Skip consent, issue code directly
                 String scopes = scope != null ? scope : client.getScopes();
-                String code = oAuthService.createAuthorizationCode(user, client, scopes, redirectUri);
+                String code = oAuthService.createAuthorizationCode(user, client, scopes, redirectUri,
+                        codeChallenge, codeChallengeMethod);
                 return buildRedirectWithCode(redirectUri, code, state);
             }
 
@@ -157,7 +158,8 @@ public class OAuthController {
             User user = authenticationService.getCurrentUserOrThrow();
 
             String scopes = authRequest.getScope() != null ? authRequest.getScope() : client.getScopes();
-            String code = oAuthService.createAuthorizationCode(user, client, scopes, redirectUri);
+            String code = oAuthService.createAuthorizationCode(user, client, scopes, redirectUri,
+                    authRequest.getCodeChallenge(), authRequest.getCodeChallengeMethod());
 
             log.info("User {} approved OAuth authorization for client {}", user.getId(), client.getClientId());
             return buildRedirectWithCode(redirectUri, code, state);
@@ -183,7 +185,8 @@ public class OAuthController {
             @RequestParam(value = "client_id", required = false) String clientId,
             @RequestParam(value = "client_secret", required = false) String clientSecret,
             @RequestParam(value = "refresh_token", required = false) String refreshToken,
-            @RequestParam(value = "scope", required = false) String scope) {
+            @RequestParam(value = "scope", required = false) String scope,
+            @RequestParam(value = "code_verifier", required = false) String codeVerifier) {
 
         TokenRequestDto tokenRequest = TokenRequestDto.builder()
                 .grantType(grantType)
@@ -193,6 +196,7 @@ public class OAuthController {
                 .clientSecret(clientSecret)
                 .refreshToken(refreshToken)
                 .scope(scope)
+                .codeVerifier(codeVerifier)
                 .build();
 
         try {

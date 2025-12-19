@@ -102,7 +102,8 @@ public class OAuthService {
      * Create an authorization code for the user's grant.
      * Returns the plain code (to be sent to client).
      */
-    public String createAuthorizationCode(User user, OAuthClient client, String scopes, String redirectUri) {
+    public String createAuthorizationCode(User user, OAuthClient client, String scopes, String redirectUri,
+                                          String codeChallenge, String codeChallengeMethod) {
         // Create or update authorization
         OAuthAuthorization authorization = authorizationRepository
                 .findByUserIdAndClientId(user.getId(), client.getId())
@@ -123,6 +124,8 @@ public class OAuthService {
                 .client(client)
                 .redirectUri(redirectUri)
                 .scopes(scopes)
+                .codeChallenge(codeChallenge)
+                .codeChallengeMethod(codeChallengeMethod)
                 .expiresAt(OffsetDateTime.now().plusSeconds(
                         jwtTokenService.getAuthorizationCodeExpirySeconds()))
                 .used(false)
@@ -169,6 +172,20 @@ public class OAuthService {
         if (!authCode.getRedirectUri().equals(request.getRedirectUri())) {
             throw new OAuthException(OAuthErrorDto.INVALID_GRANT,
                     "redirect_uri does not match");
+        }
+
+        // Validate PKCE (required by MCP spec)
+        if (authCode.getCodeChallenge() != null) {
+            if (request.getCodeVerifier() == null || request.getCodeVerifier().isBlank()) {
+                throw new OAuthException(OAuthErrorDto.INVALID_GRANT,
+                        "code_verifier is required for PKCE");
+            }
+            String computedChallenge = jwtTokenService.computeS256Challenge(request.getCodeVerifier());
+            if (!computedChallenge.equals(authCode.getCodeChallenge())) {
+                log.warn("PKCE verification failed for user {}", authCode.getUser().getId());
+                throw new OAuthException(OAuthErrorDto.INVALID_GRANT,
+                        "PKCE verification failed");
+            }
         }
 
         // Mark code as used

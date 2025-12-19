@@ -58,6 +58,14 @@ public class OAuthAuthorizationCode {
     @Builder.Default
     private Boolean used = false;
 
+    @Size(max = 128)
+    @Column(name = "code_challenge", length = 128)
+    private String codeChallenge;
+
+    @Size(max = 10)
+    @Column(name = "code_challenge_method", length = 10)
+    private String codeChallengeMethod;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

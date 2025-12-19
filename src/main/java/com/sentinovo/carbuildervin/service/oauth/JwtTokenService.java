@@ -142,6 +142,21 @@ public class JwtTokenService {
     }
 
     /**
+     * Compute S256 PKCE code challenge from a code verifier.
+     * Used to validate PKCE during token exchange.
+     * S256: BASE64URL(SHA256(code_verifier))
+     */
+    public String computeS256Challenge(String codeVerifier) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
+    }
+
+    /**
      * Get access token expiry in seconds.
      */
     public int getAccessTokenExpirySeconds() {
