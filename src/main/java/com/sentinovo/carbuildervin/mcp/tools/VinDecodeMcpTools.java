@@ -4,8 +4,8 @@ import com.sentinovo.carbuildervin.service.external.VinDecodingService;
 import com.sentinovo.carbuildervin.validation.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,9 +19,11 @@ public class VinDecodeMcpTools {
 
     private final VinDecodingService vinDecodingService;
 
-    @Tool(description = "Decode a VIN (Vehicle Identification Number) to get vehicle details like year, make, model, and trim")
+    @McpTool(name = "decodeVin",
+            description = "Decode a VIN (Vehicle Identification Number) to get vehicle details like year, make, model, and trim",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String decodeVin(
-            @ToolParam(description = "The 17-character VIN to decode") String vin
+            @McpToolParam(description = "The 17-character VIN to decode") String vin
     ) {
         log.info("MCP: Decoding VIN: {}", vin);
 
@@ -58,9 +60,11 @@ public class VinDecodeMcpTools {
         }
     }
 
-    @Tool(description = "Validate if a VIN is correctly formatted (17 characters, no I/O/Q)")
+    @McpTool(name = "validateVin",
+            description = "Validate if a VIN is correctly formatted (17 characters, no I/O/Q)",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String validateVin(
-            @ToolParam(description = "The VIN to validate") String vin
+            @McpToolParam(description = "The VIN to validate") String vin
     ) {
         log.info("MCP: Validating VIN: {}", vin);
 

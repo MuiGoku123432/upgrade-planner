@@ -13,8 +13,8 @@ import com.sentinovo.carbuildervin.service.vehicle.VehicleService;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleUpgradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -37,9 +37,11 @@ public class SubPartMcpTools {
     private final VehicleService vehicleService;
     private final McpUserContextProvider userContextProvider;
 
-    @Tool(description = "List all sub-parts for a specific parent part")
+    @McpTool(name = "listSubParts",
+            description = "List all sub-parts for a specific parent part",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<SubPartDto> listSubParts(
-            @ToolParam(description = "The UUID of the parent part") String partId
+            @McpToolParam(description = "The UUID of the parent part") String partId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Listing sub-parts for part {} for user: {}", partId, user.getUsername());
@@ -50,9 +52,11 @@ public class SubPartMcpTools {
         return subPartService.getSubPartsByParentPartId(UUID.fromString(partId));
     }
 
-    @Tool(description = "Get detailed information about a specific sub-part by its ID")
+    @McpTool(name = "getSubPart",
+            description = "Get detailed information about a specific sub-part by its ID",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public SubPartDto getSubPart(
-            @ToolParam(description = "The UUID of the sub-part") String subPartId
+            @McpToolParam(description = "The UUID of the sub-part") String subPartId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Getting sub-part {} for user: {}", subPartId, user.getUsername());
@@ -65,16 +69,18 @@ public class SubPartMcpTools {
         return subPart;
     }
 
-    @Tool(description = "Create a new sub-part for a parent part")
+    @McpTool(name = "createSubPart",
+            description = "Create a new sub-part for a parent part",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = false))
     public SubPartDto createSubPart(
-            @ToolParam(description = "The UUID of the parent part") String partId,
-            @ToolParam(description = "Name of the sub-part") String name,
-            @ToolParam(description = "Description of the sub-part") String description,
-            @ToolParam(description = "Price of the sub-part") Double price,
-            @ToolParam(description = "Status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED") String status,
-            @ToolParam(description = "Brand name (optional)") String brand,
-            @ToolParam(description = "Part number (optional)") String partNumber,
-            @ToolParam(description = "Product URL link (optional)") String productUrl
+            @McpToolParam(description = "The UUID of the parent part") String partId,
+            @McpToolParam(description = "Name of the sub-part") String name,
+            @McpToolParam(description = "Description of the sub-part") String description,
+            @McpToolParam(description = "Price of the sub-part") Double price,
+            @McpToolParam(description = "Status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED") String status,
+            @McpToolParam(description = "Brand name (optional)") String brand,
+            @McpToolParam(description = "Part number (optional)") String partNumber,
+            @McpToolParam(description = "Product URL link (optional)") String productUrl
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Creating sub-part for part {} for user: {}", partId, user.getUsername());
@@ -96,16 +102,18 @@ public class SubPartMcpTools {
         return subPartService.createSubPart(UUID.fromString(partId), createDto);
     }
 
-    @Tool(description = "Update an existing sub-part's information")
+    @McpTool(name = "updateSubPart",
+            description = "Update an existing sub-part's information",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = false))
     public SubPartDto updateSubPart(
-            @ToolParam(description = "The UUID of the sub-part to update") String subPartId,
-            @ToolParam(description = "New name (optional)") String name,
-            @ToolParam(description = "New description (optional)") String description,
-            @ToolParam(description = "New price (optional)") Double price,
-            @ToolParam(description = "New status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED (optional)") String status,
-            @ToolParam(description = "New brand (optional)") String brand,
-            @ToolParam(description = "New part number (optional)") String partNumber,
-            @ToolParam(description = "New product URL (optional)") String productUrl
+            @McpToolParam(description = "The UUID of the sub-part to update") String subPartId,
+            @McpToolParam(description = "New name (optional)") String name,
+            @McpToolParam(description = "New description (optional)") String description,
+            @McpToolParam(description = "New price (optional)") Double price,
+            @McpToolParam(description = "New status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED (optional)") String status,
+            @McpToolParam(description = "New brand (optional)") String brand,
+            @McpToolParam(description = "New part number (optional)") String partNumber,
+            @McpToolParam(description = "New product URL (optional)") String productUrl
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Updating sub-part {} for user: {}", subPartId, user.getUsername());
@@ -128,9 +136,11 @@ public class SubPartMcpTools {
         return subPartService.updateSubPart(UUID.fromString(subPartId), updateDto);
     }
 
-    @Tool(description = "Delete a sub-part")
+    @McpTool(name = "deleteSubPart",
+            description = "Delete a sub-part",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = true))
     public String deleteSubPart(
-            @ToolParam(description = "The UUID of the sub-part to delete") String subPartId
+            @McpToolParam(description = "The UUID of the sub-part to delete") String subPartId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Deleting sub-part {} for user: {}", subPartId, user.getUsername());

@@ -8,7 +8,7 @@ import com.sentinovo.carbuildervin.service.parts.PartTierService;
 import com.sentinovo.carbuildervin.service.vehicle.UpgradeCategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.annotation.Tool;
+import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,19 +26,25 @@ public class LookupMcpTools {
     private final PartTierService partTierService;
     private final UpgradeCategoryService upgradeCategoryService;
 
-    @Tool(description = "List all available part categories (e.g., SUSPENSION, ARMOR, WHEELS_TIRES)")
+    @McpTool(name = "listPartCategories",
+            description = "List all available part categories (e.g., SUSPENSION, ARMOR, WHEELS_TIRES)",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<PartCategoryDto> listPartCategories() {
         log.info("MCP: Listing part categories");
         return partCategoryService.getAllPartCategories();
     }
 
-    @Tool(description = "List all available part tiers (quality/price levels like BUDGET, MID, PREMIUM)")
+    @McpTool(name = "listPartTiers",
+            description = "List all available part tiers (quality/price levels like BUDGET, MID, PREMIUM)",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<PartTierDto> listPartTiers() {
         log.info("MCP: Listing part tiers");
         return partTierService.getAllPartTiers();
     }
 
-    @Tool(description = "List all available upgrade categories for builds (e.g., SUSPENSION, ENGINE, EXTERIOR)")
+    @McpTool(name = "listUpgradeCategories",
+            description = "List all available upgrade categories for builds (e.g., SUSPENSION, ENGINE, EXTERIOR)",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<UpgradeCategoryDto> listUpgradeCategories() {
         log.info("MCP: Listing upgrade categories");
         return upgradeCategoryService.getAllUpgradeCategories();

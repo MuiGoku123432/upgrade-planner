@@ -7,8 +7,8 @@ import com.sentinovo.carbuildervin.mcp.security.McpUserContextProvider;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,9 +27,11 @@ public class VehicleResourceProvider {
     private final McpUserContextProvider userContextProvider;
     private final ObjectMapper objectMapper;
 
-    @Tool(description = "Get a vehicle resource by its URI (vehicle://{vehicleId})")
+    @McpTool(name = "getVehicleResource",
+            description = "Get a vehicle resource by its URI (vehicle://{vehicleId})",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String getVehicleResource(
-            @ToolParam(description = "The vehicle ID from the URI") String vehicleId
+            @McpToolParam(description = "The vehicle ID from the URI") String vehicleId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP Resource: Getting vehicle {} for user: {}", vehicleId, user.getUsername());
@@ -44,7 +46,9 @@ public class VehicleResourceProvider {
         }
     }
 
-    @Tool(description = "Get all vehicles for the current user (vehicles://me)")
+    @McpTool(name = "getMyVehiclesResource",
+            description = "Get all vehicles for the current user (vehicles://me)",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String getMyVehiclesResource() {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP Resource: Getting all vehicles for user: {}", user.getUsername());

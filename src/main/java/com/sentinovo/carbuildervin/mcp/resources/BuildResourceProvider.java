@@ -11,8 +11,8 @@ import com.sentinovo.carbuildervin.service.vehicle.VehicleService;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleUpgradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -36,9 +36,11 @@ public class BuildResourceProvider {
     private final McpUserContextProvider userContextProvider;
     private final ObjectMapper objectMapper;
 
-    @Tool(description = "Get a build resource by its URI (build://{buildId})")
+    @McpTool(name = "getBuildResource",
+            description = "Get a build resource by its URI (build://{buildId})",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String getBuildResource(
-            @ToolParam(description = "The build ID from the URI") String buildId
+            @McpToolParam(description = "The build ID from the URI") String buildId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP Resource: Getting build {} for user: {}", buildId, user.getUsername());
@@ -56,9 +58,11 @@ public class BuildResourceProvider {
         }
     }
 
-    @Tool(description = "Get all builds for a vehicle (builds://vehicle/{vehicleId})")
+    @McpTool(name = "getVehicleBuildsResource",
+            description = "Get all builds for a vehicle (builds://vehicle/{vehicleId})",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String getVehicleBuildsResource(
-            @ToolParam(description = "The vehicle ID") String vehicleId
+            @McpToolParam(description = "The vehicle ID") String vehicleId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP Resource: Getting builds for vehicle {} for user: {}", vehicleId, user.getUsername());
@@ -76,9 +80,11 @@ public class BuildResourceProvider {
         }
     }
 
-    @Tool(description = "Get a build summary with cost breakdown (build://{buildId}/summary)")
+    @McpTool(name = "getBuildSummaryResource",
+            description = "Get a build summary with cost breakdown (build://{buildId}/summary)",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String getBuildSummaryResource(
-            @ToolParam(description = "The build ID") String buildId
+            @McpToolParam(description = "The build ID") String buildId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP Resource: Getting build summary {} for user: {}", buildId, user.getUsername());

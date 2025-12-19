@@ -11,8 +11,8 @@ import com.sentinovo.carbuildervin.service.vehicle.VehicleService;
 import com.sentinovo.carbuildervin.service.vehicle.VehicleUpgradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -33,9 +33,11 @@ public class PartMcpTools {
     private final VehicleService vehicleService;
     private final McpUserContextProvider userContextProvider;
 
-    @Tool(description = "List all parts in a specific build")
+    @McpTool(name = "listParts",
+            description = "List all parts in a specific build",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<PartDto> listParts(
-            @ToolParam(description = "The UUID of the build") String buildId
+            @McpToolParam(description = "The UUID of the build") String buildId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Listing parts for build {} for user: {}", buildId, user.getUsername());
@@ -47,9 +49,11 @@ public class PartMcpTools {
         return partService.getPartsByUpgradeId(UUID.fromString(buildId));
     }
 
-    @Tool(description = "Get detailed information about a specific part by its ID")
+    @McpTool(name = "getPart",
+            description = "Get detailed information about a specific part by its ID",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public PartDto getPart(
-            @ToolParam(description = "The UUID of the part") String partId
+            @McpToolParam(description = "The UUID of the part") String partId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Getting part {} for user: {}", partId, user.getUsername());
@@ -63,19 +67,21 @@ public class PartMcpTools {
         return part;
     }
 
-    @Tool(description = "Create a new part in a build")
+    @McpTool(name = "createPart",
+            description = "Create a new part in a build",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = false))
     public PartDto createPart(
-            @ToolParam(description = "The UUID of the build to add the part to") String buildId,
-            @ToolParam(description = "Name of the part") String name,
-            @ToolParam(description = "Part category code (e.g., SUSPENSION, ARMOR, WHEELS_TIRES)") String categoryCode,
-            @ToolParam(description = "Part tier code (e.g., BUDGET, MID, PREMIUM)") String tierCode,
-            @ToolParam(description = "Price of the part") Double price,
-            @ToolParam(description = "Status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED") String status,
-            @ToolParam(description = "Brand name (optional)") String brand,
-            @ToolParam(description = "Part number (optional)") String partNumber,
-            @ToolParam(description = "Product URL link (optional)") String productUrl,
-            @ToolParam(description = "Priority value for ordering (lower = higher priority)") Integer priorityValue,
-            @ToolParam(description = "Is this part required for the build?") Boolean isRequired
+            @McpToolParam(description = "The UUID of the build to add the part to") String buildId,
+            @McpToolParam(description = "Name of the part") String name,
+            @McpToolParam(description = "Part category code (e.g., SUSPENSION, ARMOR, WHEELS_TIRES)") String categoryCode,
+            @McpToolParam(description = "Part tier code (e.g., BUDGET, MID, PREMIUM)") String tierCode,
+            @McpToolParam(description = "Price of the part") Double price,
+            @McpToolParam(description = "Status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED") String status,
+            @McpToolParam(description = "Brand name (optional)") String brand,
+            @McpToolParam(description = "Part number (optional)") String partNumber,
+            @McpToolParam(description = "Product URL link (optional)") String productUrl,
+            @McpToolParam(description = "Priority value for ordering (lower = higher priority)") Integer priorityValue,
+            @McpToolParam(description = "Is this part required for the build?") Boolean isRequired
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Creating part for build {} for user: {}", buildId, user.getUsername());
@@ -101,19 +107,21 @@ public class PartMcpTools {
         return partService.createPart(UUID.fromString(buildId), createDto);
     }
 
-    @Tool(description = "Update an existing part's information")
+    @McpTool(name = "updatePart",
+            description = "Update an existing part's information",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = false))
     public PartDto updatePart(
-            @ToolParam(description = "The UUID of the part to update") String partId,
-            @ToolParam(description = "New name (optional)") String name,
-            @ToolParam(description = "New category code (optional)") String categoryCode,
-            @ToolParam(description = "New tier code (optional)") String tierCode,
-            @ToolParam(description = "New price (optional)") Double price,
-            @ToolParam(description = "New status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED (optional)") String status,
-            @ToolParam(description = "New brand (optional)") String brand,
-            @ToolParam(description = "New part number (optional)") String partNumber,
-            @ToolParam(description = "New product URL (optional)") String productUrl,
-            @ToolParam(description = "New priority value (optional)") Integer priorityValue,
-            @ToolParam(description = "Is required? (optional)") Boolean isRequired
+            @McpToolParam(description = "The UUID of the part to update") String partId,
+            @McpToolParam(description = "New name (optional)") String name,
+            @McpToolParam(description = "New category code (optional)") String categoryCode,
+            @McpToolParam(description = "New tier code (optional)") String tierCode,
+            @McpToolParam(description = "New price (optional)") Double price,
+            @McpToolParam(description = "New status: PLANNED, ORDERED, SHIPPED, DELIVERED, INSTALLED, CANCELLED (optional)") String status,
+            @McpToolParam(description = "New brand (optional)") String brand,
+            @McpToolParam(description = "New part number (optional)") String partNumber,
+            @McpToolParam(description = "New product URL (optional)") String productUrl,
+            @McpToolParam(description = "New priority value (optional)") Integer priorityValue,
+            @McpToolParam(description = "Is required? (optional)") Boolean isRequired
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Updating part {} for user: {}", partId, user.getUsername());
@@ -140,9 +148,11 @@ public class PartMcpTools {
         return partService.updatePart(UUID.fromString(partId), updateDto);
     }
 
-    @Tool(description = "Delete a part and all its associated sub-parts")
+    @McpTool(name = "deletePart",
+            description = "Delete a part and all its associated sub-parts",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = true))
     public String deletePart(
-            @ToolParam(description = "The UUID of the part to delete") String partId
+            @McpToolParam(description = "The UUID of the part to delete") String partId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Deleting part {} for user: {}", partId, user.getUsername());
@@ -157,9 +167,11 @@ public class PartMcpTools {
         return "Part deleted successfully";
     }
 
-    @Tool(description = "Calculate the total cost of all parts in a build")
+    @McpTool(name = "calculateBuildCost",
+            description = "Calculate the total cost of all parts in a build",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public String calculateBuildCost(
-            @ToolParam(description = "The UUID of the build") String buildId
+            @McpToolParam(description = "The UUID of the build") String buildId
     ) {
         User user = userContextProvider.getCurrentUser();
         log.info("MCP: Calculating cost for build {} for user: {}", buildId, user.getUsername());
