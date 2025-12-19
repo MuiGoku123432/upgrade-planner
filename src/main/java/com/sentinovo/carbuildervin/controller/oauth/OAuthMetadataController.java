@@ -36,6 +36,7 @@ public class OAuthMetadataController {
         Map<String, Object> metadata = new LinkedHashMap<>();
         metadata.put("resource", issuer);
         metadata.put("authorization_servers", List.of(issuer));
+        metadata.put("scopes_supported", List.of("mcp:read", "mcp:write"));
         metadata.put("bearer_methods_supported", List.of("header"));
         return metadata;
     }
